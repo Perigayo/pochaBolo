@@ -1,0 +1,15 @@
+{
+  "name": "Pocha Master Online",
+  "short_name": "Pocha",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#064e3b",
+  "theme_color": "#064e3b",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/1041/1041883.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

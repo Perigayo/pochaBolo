@@ -3,64 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>POCHA MASTER ONLINE</title>
+    <title>Pocha Master</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1041/1041883.png">
+    <link rel="manifest" href="manifest.json">
+
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+
     <style>
         body { background-color: #064e3b; color: white; font-family: sans-serif; overflow: hidden; position: fixed; width: 100%; height: 100%; }
         .glass { background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.1); }
-        .card { width: 58px; height: 85px; background: white; color: black; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 5px; font-weight: 900; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        .card-active { border: 3px solid #fbbf24; transform: translateY(-10px); }
-        .table-center { background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 75%); border-radius: 50%; width: 240px; height: 240px; position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); border: 1px dashed rgba(255,255,255,0.2); }
-        .played-card { position: absolute; transform-origin: center; left: 50%; top: 50%; margin-left: -29px; margin-top: -42px; z-index: 10; }
-        #bet-modal { background: rgba(0,0,0,0.7); backdrop-filter: blur(2px); }
+        .card { width: 60px; height: 88px; background: white; color: black; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 5px; font-weight: 900; box-shadow: 0 4px 10px rgba(0,0,0,0.5); position: relative; }
+        .card-active { border: 3px solid #fbbf24; transform: translateY(-15px); transition: transform 0.2s; }
+        .table-center { background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 75%); border-radius: 50%; width: 240px; height: 240px; position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%); border: 1px dashed rgba(255,255,255,0.2); }
+        .played-card { position: absolute; transform-origin: center; left: 50%; top: 50%; margin-left: -30px; margin-top: -44px; z-index: 10; }
+        
+        /* Modal de apuestas que permite ver el fondo */
+        #bet-modal { background: rgba(0,0,0,0.3); pointer-events: none; }
+        #bet-container { pointer-events: auto; transform: translateY(20px); }
         .btn-forbidden { background: #450a0a !important; color: #ef4444 !important; opacity: 0.5; pointer-events: none; border: 1px solid #ef4444; }
+        
+        #player-hand { z-index: 160; position: relative; }
+        #trump-slot { z-index: 160; position: relative; }
     </style>
 </head>
 <body>
 
     <div id="main-menu" class="flex flex-col items-center justify-center h-screen space-y-6 z-[200] bg-[#064e3b] absolute inset-0">
-        <h1 class="text-5xl font-black text-yellow-500 italic uppercase">LA POCHA</h1>
+        <h1 class="text-5xl font-black text-yellow-500 italic uppercase tracking-tighter text-center px-4 leading-none">LA POCHA<br><span class="text-xl text-white opacity-40">ONLINE</span></h1>
         <div class="text-7xl">🍏</div>
         <div class="w-full max-w-xs space-y-4 px-4">
-            <button onclick="initOnline()" class="w-full bg-blue-600 p-5 rounded-2xl font-black text-xl shadow-lg uppercase">🌐 Juego Online</button>
-            <button onclick="document.getElementById('main-menu').style.display='none'; document.getElementById('score-screen').classList.remove('hidden');" class="w-full bg-zinc-800 p-5 rounded-2xl font-black text-xl shadow-lg uppercase border border-white/10">📝 Marcador BOLO</button>
+            <button onclick="initOnline()" class="w-full bg-blue-600 p-5 rounded-2xl font-black text-xl shadow-lg uppercase active:scale-95 transition-transform">🌐 Jugar Online</button>
+            <button onclick="location.reload()" class="w-full bg-zinc-800 p-5 rounded-2xl font-black text-lg shadow-lg uppercase border border-white/10 opacity-50">📝 Modo Marcador</button>
         </div>
     </div>
 
     <div id="online-game-screen" class="hidden h-screen flex flex-col p-4">
-        <div class="flex justify-between items-start z-10">
+        <div class="flex justify-between items-start z-[160]">
             <div id="online-scores" class="glass p-3 rounded-xl text-[11px] leading-tight min-w-[110px] border-l-4 border-yellow-500"></div>
             <div class="flex flex-col items-center">
-                <span class="text-[10px] font-bold text-yellow-500 uppercase mb-1">Pinta</span>
+                <span class="text-[10px] font-bold text-yellow-500 uppercase mb-1 drop-shadow-lg">Pinta</span>
                 <div id="trump-slot" class="scale-90"></div>
             </div>
         </div>
 
         <div class="table-center" id="board"></div>
 
-        <div class="absolute top-[62%] left-0 w-full text-center z-20">
-            <p id="status-msg" class="text-yellow-400 font-black uppercase text-sm tracking-widest drop-shadow-md"></p>
+        <div class="absolute top-[65%] left-0 w-full text-center z-20 pointer-events-none">
+            <p id="status-msg" class="text-yellow-400 font-black uppercase text-sm tracking-widest drop-shadow-md bg-black/20 inline-block px-4 py-1 rounded-full"></p>
         </div>
 
         <div class="mt-auto flex flex-col items-center">
-            <div id="player-hand" class="flex justify-center gap-1 pb-10 min-h-[100px]"></div>
+            <div id="player-hand" class="flex justify-center gap-1 pb-10 min-h-[120px]"></div>
         </div>
     </div>
 
-    <div id="bet-modal" class="hidden fixed inset-0 z-[150] flex flex-col items-center justify-start pt-20 p-6">
-        <div class="glass p-6 rounded-3xl text-center border-t-4 border-yellow-500 shadow-2xl w-full max-w-xs">
-            <p id="bet-player-name" class="text-white text-sm font-bold opacity-70 uppercase mb-1"></p>
-            <h2 class="text-2xl font-black text-yellow-500 mb-4 uppercase italic">¿Cuántas pides?</h2>
-            <div id="bet-options" class="flex flex-wrap justify-center gap-3"></div>
-            <p id="forbidden-msg" class="text-red-500 text-[10px] font-bold mt-4 uppercase hidden">⚠️ Eres el último: Prohibido <span id="forbidden-val"></span></p>
+    <div id="bet-modal" class="hidden fixed inset-0 z-[150] flex flex-col items-center justify-start pt-20">
+        <div id="bet-container" class="glass p-5 rounded-3xl text-center border-b-4 border-yellow-500 shadow-2xl w-[85%] max-w-xs">
+            <p id="bet-player-name" class="text-yellow-500 text-xs font-bold uppercase mb-1"></p>
+            <h2 class="text-xl font-black text-white mb-4 uppercase italic">¿Cuántas pides?</h2>
+            <div id="bet-options" class="flex flex-wrap justify-center gap-2"></div>
+            <p id="forbidden-msg" class="text-red-500 text-[10px] font-bold mt-4 uppercase hidden">⚠️ Prohibido <span id="forbidden-val"></span></p>
         </div>
-    </div>
-
-    <div id="score-screen" class="hidden max-w-md mx-auto p-4 flex-col items-center h-screen justify-center text-center">
-        <h2 class="text-2xl font-black mb-4">MODO MARCADOR ACTIVO</h2>
-        <button onclick="location.reload()" class="bg-yellow-500 text-black p-4 rounded-xl font-bold uppercase">Volver al Inicio</button>
     </div>
 
     <script>
@@ -78,7 +86,7 @@
 
         function initOnline() {
             myName = prompt("TU NOMBRE:").toUpperCase();
-            roomCode = prompt("CÓDIGO DE SALA:").toUpperCase();
+            roomCode = prompt("CÓDIGO SALA:").toUpperCase();
             if(!myName || !roomCode) return;
             roomRef = db.ref('rooms/' + roomCode);
             roomRef.on('value', snap => { gameState = snap.val(); if(gameState) renderGame(); });
@@ -98,12 +106,12 @@
 
             if(gameState.phase === 'LOBBY') {
                 document.getElementById('status-msg').innerHTML = gameState.players[0].name === myName ? 
-                    `<button onclick="startNewRound()" class="bg-green-600 text-white px-8 py-3 rounded-2xl font-black">REPARTIR</button>` : `ESPERANDO AL JEFE...`;
+                    `<button onclick="startNewRound()" class="bg-green-600 text-white px-6 py-2 rounded-xl font-black pointer-events-auto">REPARTIR</button>` : `ESPERANDO AL LÍDER...`;
                 return;
             }
 
             document.getElementById('online-scores').innerHTML = gameState.players.map(p => 
-                `<div class="${p.name === activePlayer.name ? 'text-yellow-400 font-bold' : ''}">${p.name}: ${p.score} <span class="opacity-60">[${p.made}/${p.bet < 0 ? '?' : p.bet}]</span></div>`
+                `<div class="${p.name === activePlayer.name ? 'text-yellow-400 font-bold' : ''}">${p.name}: ${p.score} <small class="opacity-60">[${p.made}/${p.bet < 0 ? '?' : p.bet}]</small></div>`
             ).join('');
 
             const trumpDiv = document.getElementById('trump-slot');
@@ -114,7 +122,7 @@
                 if(p.played) {
                     const c = createCardUI(p.played); c.classList.add('played-card');
                     const angle = i * (360 / gameState.players.length);
-                    c.style.transform = `rotate(${angle}deg) translateY(-65px) rotate(-${angle}deg)`;
+                    c.style.transform = `rotate(${angle}deg) translateY(-68px) rotate(-${angle}deg)`;
                     board.appendChild(c);
                 }
             });
@@ -122,24 +130,20 @@
             const handDiv = document.getElementById('player-hand'); handDiv.innerHTML = '';
             me.hand.forEach((c, i) => {
                 const cardUI = createCardUI(c);
-                if(myTurn && gameState.phase === 'PLAYING') { cardUI.onclick = () => playCard(i); cardUI.classList.add('card-active'); }
+                if(myTurn && gameState.phase === 'PLAYING') { cardUI.onclick = () => playCard(i); cardUI.classList.add('card-active', 'cursor-pointer'); }
                 handDiv.appendChild(cardUI);
             });
 
-            // LÓGICA MODAL APUESTAS + REGLA DEL ÚLTIMO
             const betModal = document.getElementById('bet-modal');
             if(gameState.phase === 'BETTING') {
                 betModal.classList.remove('hidden');
-                document.getElementById('bet-player-name').innerText = "TURNO DE: " + activePlayer.name;
+                document.getElementById('bet-player-name').innerText = "PIDE: " + activePlayer.name;
                 const options = document.getElementById('bet-options'); options.innerHTML = '';
                 
                 if(myTurn) {
-                    // Cálculo de la regla del último
-                    const numPlayers = gameState.players.length;
                     const betsMade = gameState.players.filter(p => p.bet !== -1).length;
-                    const isLast = betsMade === numPlayers - 1;
+                    const isLast = betsMade === gameState.players.length - 1;
                     let forbidden = -1;
-                    
                     if(isLast) {
                         const sumOthers = gameState.players.reduce((acc, p) => acc + (p.bet === -1 ? 0 : p.bet), 0);
                         forbidden = gameState.round - sumOthers;
@@ -147,20 +151,18 @@
                             document.getElementById('forbidden-msg').classList.remove('hidden');
                             document.getElementById('forbidden-val').innerText = forbidden;
                         }
-                    } else {
-                        document.getElementById('forbidden-msg').classList.add('hidden');
-                    }
+                    } else { document.getElementById('forbidden-msg').classList.add('hidden'); }
 
                     for(let i=0; i<=gameState.round; i++) {
                         const btn = document.createElement('button');
-                        btn.className = "w-12 h-12 bg-yellow-500 text-black font-black rounded-xl text-xl";
+                        btn.className = "w-10 h-10 bg-yellow-500 text-black font-black rounded-lg text-lg";
                         if(i === forbidden) btn.classList.add('btn-forbidden');
                         btn.innerText = i;
                         btn.onclick = () => makeBet(i);
                         options.appendChild(btn);
                     }
                 } else {
-                    options.innerHTML = `<p class="text-white/40 italic">Esperando apuesta...</p>`;
+                    options.innerHTML = `<p class="text-white/40 italic text-xs">Esperando elección...</p>`;
                     document.getElementById('forbidden-msg').classList.add('hidden');
                 }
             } else { betModal.classList.add('hidden'); }
@@ -171,7 +173,7 @@
         function createCardUI(card) {
             const div = document.createElement('div'); div.className = 'card';
             const val = card.v === 1 ? 'A' : (card.v === 10 ? 'S' : (card.v === 11 ? 'C' : (card.v === 12 ? 'R' : card.v)));
-            div.innerHTML = `<div class="text-xs self-start">${val}</div><div class="text-3xl">${emojis[card.s]}</div><div class="text-xs self-end rotate-180">${val}</div>`;
+            div.innerHTML = `<div class="text-[10px] self-start leading-none">${val}</div><div class="text-3xl">${emojis[card.s]}</div><div class="text-[10px] self-end rotate-180 leading-none">${val}</div>`;
             return div;
         }
 
