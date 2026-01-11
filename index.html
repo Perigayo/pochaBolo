@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>POCHA MASTER ONLINE</title>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #064e3b; color: white; font-family: sans-serif; overflow: hidden; position: fixed; width: 100%; height: 100%; }
+        .glass { background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.1); }
+        .card { width: 58px; height: 85px; background: white; color: black; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 5px; font-weight: 900; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .card-active { border: 3px solid #fbbf24; transform: translateY(-10px); }
+        .table-center { background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 75%); border-radius: 50%; width: 240px; height: 240px; position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); border: 1px dashed rgba(255,255,255,0.2); }
+        .played-card { position: absolute; transform-origin: center; left: 50%; top: 50%; margin-left: -29px; margin-top: -42px; z-index: 10; }
+        #bet-modal { background: rgba(0,0,0,0.7); backdrop-filter: blur(2px); }
+        .btn-forbidden { background: #450a0a !important; color: #ef4444 !important; opacity: 0.5; pointer-events: none; border: 1px solid #ef4444; }
+    </style>
+</head>
+<body>
+
+    <div id="main-menu" class="flex flex-col items-center justify-center h-screen space-y-6 z-[200] bg-[#064e3b] absolute inset-0">
+        <h1 class="text-5xl font-black text-yellow-500 italic uppercase">LA POCHA</h1>
+        <div class="text-7xl">🍏</div>
+        <div class="w-full max-w-xs space-y-4 px-4">
+            <button onclick="initOnline()" class="w-full bg-blue-600 p-5 rounded-2xl font-black text-xl shadow-lg uppercase">🌐 Juego Online</button>
+            <button onclick="document.getElementById('main-menu').style.display='none'; document.getElementById('score-screen').classList.remove('hidden');" class="w-full bg-zinc-800 p-5 rounded-2xl font-black text-xl shadow-lg uppercase border border-white/10">📝 Marcador BOLO</button>
+        </div>
+    </div>
+
+    <div id="online-game-screen" class="hidden h-screen flex flex-col p-4">
+        <div class="flex justify-between items-start z-10">
+            <div id="online-scores" class="glass p-3 rounded-xl text-[11px] leading-tight min-w-[110px] border-l-4 border-yellow-500"></div>
+            <div class="flex flex-col items-center">
+                <span class="text-[10px] font-bold text-yellow-500 uppercase mb-1">Pinta</span>
+                <div id="trump-slot" class="scale-90"></div>
+            </div>
+        </div>
+
+        <div class="table-center" id="board"></div>
+
+        <div class="absolute top-[62%] left-0 w-full text-center z-20">
+            <p id="status-msg" class="text-yellow-400 font-black uppercase text-sm tracking-widest drop-shadow-md"></p>
+        </div>
+
+        <div class="mt-auto flex flex-col items-center">
+            <div id="player-hand" class="flex justify-center gap-1 pb-10 min-h-[100px]"></div>
+        </div>
+    </div>
+
+    <div id="bet-modal" class="hidden fixed inset-0 z-[150] flex flex-col items-center justify-start pt-20 p-6">
+        <div class="glass p-6 rounded-3xl text-center border-t-4 border-yellow-500 shadow-2xl w-full max-w-xs">
+            <p id="bet-player-name" class="text-white text-sm font-bold opacity-70 uppercase mb-1"></p>
+            <h2 class="text-2xl font-black text-yellow-500 mb-4 uppercase italic">¿Cuántas pides?</h2>
+            <div id="bet-options" class="flex flex-wrap justify-center gap-3"></div>
+            <p id="forbidden-msg" class="text-red-500 text-[10px] font-bold mt-4 uppercase hidden">⚠️ Eres el último: Prohibido <span id="forbidden-val"></span></p>
+        </div>
+    </div>
+
+    <div id="score-screen" class="hidden max-w-md mx-auto p-4 flex-col items-center h-screen justify-center text-center">
+        <h2 class="text-2xl font-black mb-4">MODO MARCADOR ACTIVO</h2>
+        <button onclick="location.reload()" class="bg-yellow-500 text-black p-4 rounded-xl font-bold uppercase">Volver al Inicio</button>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBUXvMwtXc2S_lNghaWOPwvKF5Z7EDB2lQ",
+            authDomain: "pochaonline-ebbc1.firebaseapp.com",
+            databaseURL: "https://pochaonline-ebbc1-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "pochaonline-ebbc1"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        let myName = ""; let roomCode = ""; let roomRef = null; let gameState = null;
+        const emojis = {'OROS': '🟡', 'COPAS': '🍷', 'ESPADAS': '⚔️', 'BASTOS': '🪵'};
+
+        function initOnline() {
+            myName = prompt("TU NOMBRE:").toUpperCase();
+            roomCode = prompt("CÓDIGO DE SALA:").toUpperCase();
+            if(!myName || !roomCode) return;
+            roomRef = db.ref('rooms/' + roomCode);
+            roomRef.on('value', snap => { gameState = snap.val(); if(gameState) renderGame(); });
+            roomRef.once('value', snap => {
+                let data = snap.val() || { players: [], started: false, round: 1, turn: 0, phase: 'LOBBY' };
+                if(!data.players.find(p => p.name === myName)) data.players.push({ name: myName, score: 0, bet: -1, made: 0, hand: [] });
+                roomRef.set(data);
+            });
+            document.getElementById('main-menu').style.display = 'none';
+            document.getElementById('online-game-screen').classList.remove('hidden');
+        }
+
+        function renderGame() {
+            const me = gameState.players.find(p => p.name === myName);
+            const activePlayer = gameState.players[gameState.turn];
+            const myTurn = activePlayer.name === myName;
+
+            if(gameState.phase === 'LOBBY') {
+                document.getElementById('status-msg').innerHTML = gameState.players[0].name === myName ? 
+                    `<button onclick="startNewRound()" class="bg-green-600 text-white px-8 py-3 rounded-2xl font-black">REPARTIR</button>` : `ESPERANDO AL JEFE...`;
+                return;
+            }
+
+            document.getElementById('online-scores').innerHTML = gameState.players.map(p => 
+                `<div class="${p.name === activePlayer.name ? 'text-yellow-400 font-bold' : ''}">${p.name}: ${p.score} <span class="opacity-60">[${p.made}/${p.bet < 0 ? '?' : p.bet}]</span></div>`
+            ).join('');
+
+            const trumpDiv = document.getElementById('trump-slot');
+            trumpDiv.innerHTML = ''; if(gameState.trump) trumpDiv.appendChild(createCardUI(gameState.trump));
+
+            const board = document.getElementById('board'); board.innerHTML = '';
+            gameState.players.forEach((p, i) => {
+                if(p.played) {
+                    const c = createCardUI(p.played); c.classList.add('played-card');
+                    const angle = i * (360 / gameState.players.length);
+                    c.style.transform = `rotate(${angle}deg) translateY(-65px) rotate(-${angle}deg)`;
+                    board.appendChild(c);
+                }
+            });
+
+            const handDiv = document.getElementById('player-hand'); handDiv.innerHTML = '';
+            me.hand.forEach((c, i) => {
+                const cardUI = createCardUI(c);
+                if(myTurn && gameState.phase === 'PLAYING') { cardUI.onclick = () => playCard(i); cardUI.classList.add('card-active'); }
+                handDiv.appendChild(cardUI);
+            });
+
+            // LÓGICA MODAL APUESTAS + REGLA DEL ÚLTIMO
+            const betModal = document.getElementById('bet-modal');
+            if(gameState.phase === 'BETTING') {
+                betModal.classList.remove('hidden');
+                document.getElementById('bet-player-name').innerText = "TURNO DE: " + activePlayer.name;
+                const options = document.getElementById('bet-options'); options.innerHTML = '';
+                
+                if(myTurn) {
+                    // Cálculo de la regla del último
+                    const numPlayers = gameState.players.length;
+                    const betsMade = gameState.players.filter(p => p.bet !== -1).length;
+                    const isLast = betsMade === numPlayers - 1;
+                    let forbidden = -1;
+                    
+                    if(isLast) {
+                        const sumOthers = gameState.players.reduce((acc, p) => acc + (p.bet === -1 ? 0 : p.bet), 0);
+                        forbidden = gameState.round - sumOthers;
+                        if(forbidden >= 0 && forbidden <= gameState.round) {
+                            document.getElementById('forbidden-msg').classList.remove('hidden');
+                            document.getElementById('forbidden-val').innerText = forbidden;
+                        }
+                    } else {
+                        document.getElementById('forbidden-msg').classList.add('hidden');
+                    }
+
+                    for(let i=0; i<=gameState.round; i++) {
+                        const btn = document.createElement('button');
+                        btn.className = "w-12 h-12 bg-yellow-500 text-black font-black rounded-xl text-xl";
+                        if(i === forbidden) btn.classList.add('btn-forbidden');
+                        btn.innerText = i;
+                        btn.onclick = () => makeBet(i);
+                        options.appendChild(btn);
+                    }
+                } else {
+                    options.innerHTML = `<p class="text-white/40 italic">Esperando apuesta...</p>`;
+                    document.getElementById('forbidden-msg').classList.add('hidden');
+                }
+            } else { betModal.classList.add('hidden'); }
+
+            document.getElementById('status-msg').innerText = myTurn ? "¡TU TURNO!" : "TURNO DE " + activePlayer.name;
+        }
+
+        function createCardUI(card) {
+            const div = document.createElement('div'); div.className = 'card';
+            const val = card.v === 1 ? 'A' : (card.v === 10 ? 'S' : (card.v === 11 ? 'C' : (card.v === 12 ? 'R' : card.v)));
+            div.innerHTML = `<div class="text-xs self-start">${val}</div><div class="text-3xl">${emojis[card.s]}</div><div class="text-xs self-end rotate-180">${val}</div>`;
+            return div;
+        }
+
+        function startNewRound() {
+            const deck = []; ['OROS','COPAS','ESPADAS','BASTOS'].forEach(s => [1,2,3,4,5,6,7,10,11,12].forEach(v => deck.push({s,v})));
+            deck.sort(() => Math.random() - 0.5);
+            gameState.players.forEach(p => { p.hand = deck.splice(0, gameState.round); p.bet = -1; p.made = 0; p.played = null; });
+            gameState.trump = deck.pop(); gameState.phase = 'BETTING'; gameState.turn = 0; gameState.firstSuit = null;
+            roomRef.set(gameState);
+        }
+
+        function makeBet(n) {
+            const idx = gameState.turn;
+            gameState.players[idx].bet = n;
+            gameState.turn = (gameState.turn + 1) % gameState.players.length;
+            if(gameState.players.every(p => p.bet !== -1)) gameState.phase = 'PLAYING';
+            roomRef.set(gameState);
+        }
+
+        function playCard(i) {
+            const pIdx = gameState.turn;
+            const card = gameState.players[pIdx].hand.splice(i, 1)[0];
+            gameState.players[pIdx].played = card;
+            if(!gameState.firstSuit) gameState.firstSuit = card.s;
+            if(gameState.players.every(p => p.played)) { roomRef.set(gameState); setTimeout(resolveBaza, 2000); }
+            else { gameState.turn = (gameState.turn + 1) % gameState.players.length; roomRef.set(gameState); }
+        }
+
+        function resolveBaza() {
+            let winnerIdx = 0; let bestVal = -1;
+            gameState.players.forEach((p, i) => {
+                let v = p.played.v; if(v === 1) v = 20; if(v === 3) v = 15;
+                let power = (p.played.s === gameState.trump.s) ? v + 100 : (p.played.s === gameState.firstSuit ? v : 0);
+                if(power > bestVal) { bestVal = power; winnerIdx = i; }
+            });
+            gameState.players[winnerIdx].made++;
+            gameState.players.forEach(p => p.played = null);
+            gameState.turn = winnerIdx; gameState.firstSuit = null;
+            if(gameState.players[0].hand.length === 0) {
+                gameState.players.forEach(p => { if(p.bet === p.made) p.score += (10 + p.bet * 5); else p.score -= 5; });
+                gameState.round++; gameState.phase = 'LOBBY'; 
+            }
+            roomRef.set(gameState);
+        }
+    </script>
+</body>
+</html>
