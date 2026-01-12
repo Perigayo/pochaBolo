@@ -352,6 +352,10 @@
         for(let i=0;i<nP;i++) s.push(max); for(let i=max-1;i>=2;i--) s.push(i);
         for(let i=0;i<nP;i++) s.push(1); return s;
     }
+	
+	if('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js');
+}
 </script>
 </body>
 </html>
