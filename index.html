@@ -3,20 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>POCHA MASTER 100%</title>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <title>Pocha Master 2026</title>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root { --gold: #fbbf24; }
-        body { background-color: #064e3b; color: white; font-family: sans-serif; overflow: hidden; position: fixed; width: 100%; height: 100%; margin: 0; }
+        body { background-color: #064e3b; color: white; font-family: sans-serif; overflow: hidden; position: fixed; width: 100%; height: 100%; }
         .glass { background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
         .card { width: 52px; height: 78px; background: white !important; color: black !important; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 4px; font-weight: 900; box-shadow: 0 4px 10px rgba(0,0,0,0.5); border: 1px solid #ccc; }
         .table-center { background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 75%); border-radius: 50%; width: 220px; height: 220px; position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); border: 1px dashed rgba(255,255,255,0.2); }
-        .played-card { position: absolute; transform-origin: center; left: 50%; top: 50%; margin-left: -26px; margin-top: -39px; z-index: 10; }
-        .card-active { border: 3px solid var(--gold) !important; transform: translateY(-12px); cursor: pointer; }
+        .played-card { position: absolute; transform-origin: center; left: 50%; top: 50%; margin-left: -26px; margin-top: -39px; z-index: 10; transition: all 0.3s ease; }
+        .card-active { border: 3px solid #fbbf24 !important; transform: translateY(-12px); cursor: pointer; }
         .input-dark { background: #1a1a1a; border: 1px solid #444; color: white; border-radius: 12px; }
-        .bet-overlay { position: fixed; top: 20%; left: 50%; transform: translateX(-50%); z-index: 100; width: 90%; max-width: 350px; }
     </style>
 </head>
 <body>
@@ -32,43 +30,45 @@
     <div id="screen-online-login" class="hidden flex flex-col items-center justify-center h-screen bg-[#064e3b] px-6">
         <div class="glass p-6 rounded-3xl w-full max-w-xs space-y-4">
             <h2 class="text-center font-bold text-yellow-500 uppercase">Acceso Online</h2>
-            <input type="text" id="on-name" placeholder="TU NOMBRE" class="w-full p-4 bg-zinc-900 border border-zinc-700 rounded-xl text-white font-bold uppercase">
-            <input type="text" id="on-room" placeholder="CÓDIGO SALA" class="w-full p-4 bg-zinc-900 border border-zinc-700 rounded-xl text-white font-bold uppercase">
-            <button onclick="initOnline()" class="w-full bg-blue-600 p-5 rounded-2xl font-black text-xl uppercase">Entrar</button>
+            <input type="text" id="input-name" placeholder="TU NOMBRE" class="w-full p-4 bg-zinc-900 border border-zinc-700 rounded-xl text-white font-bold uppercase">
+            <input type="text" id="input-room" placeholder="CÓDIGO SALA" class="w-full p-4 bg-zinc-900 border border-zinc-700 rounded-xl text-white font-bold uppercase">
+            <button onclick="joinOnline()" class="w-full bg-blue-600 p-5 rounded-2xl font-black text-xl uppercase">Entrar</button>
             <button onclick="showScreen('screen-menu')" class="w-full text-zinc-400 text-sm uppercase">Volver</button>
         </div>
     </div>
 
-    <div id="screen-game" class="hidden h-screen flex flex-col p-4 relative overflow-hidden">
+    <div id="screen-game" class="hidden h-screen flex flex-col p-4 relative overflow-hidden bg-[#064e3b]">
         <div class="flex justify-between items-start z-10">
-            <div id="on-scores" class="glass p-2 rounded-xl text-[10px] min-w-[110px] border-l-4 border-yellow-500"></div>
-            <div id="on-trump" class="scale-90"></div>
+            <div id="ui-scores" class="glass p-2 rounded-xl text-[10px] min-w-[110px] border-l-4 border-yellow-500"></div>
+            <div id="ui-trump" class="scale-90"></div>
         </div>
 
-        <div class="table-center" id="on-table"></div>
+        <div class="table-center" id="ui-board"></div>
 
-        <div id="on-bet-modal" class="hidden bet-overlay glass p-4 rounded-3xl text-center border-b-4 border-yellow-500">
-            <h2 id="bet-title" class="text-sm font-black mb-3 text-white uppercase">¿Cuántas quieres?</h2>
-            <div id="bet-btns" class="grid grid-cols-5 gap-2"></div>
-            <p id="bet-forbidden" class="text-red-500 text-[10px] font-bold mt-2 uppercase hidden">⚠️ PROHIBIDO <span id="forbidden-val"></span></p>
+        <div class="absolute top-[65%] left-0 w-full text-center z-20">
+            <p id="status-text" class="text-yellow-400 font-black uppercase text-xs bg-black/60 px-4 py-2 inline-block rounded-full border border-yellow-500/20"></p>
         </div>
 
-        <div class="absolute top-[62%] left-0 w-full text-center z-20">
-            <p id="on-status" class="text-yellow-400 font-black uppercase text-[10px] bg-black/60 px-4 py-2 inline-block rounded-full border border-yellow-500/20"></p>
-        </div>
+        <div class="mt-auto flex justify-center gap-1 pb-12 overflow-x-auto" id="ui-hand" style="min-height: 100px;"></div>
+    </div>
 
-        <div class="mt-auto flex justify-center gap-1 pb-10 overflow-x-auto" id="on-hand" style="min-height: 110px;"></div>
+    <div id="modal-bet" class="hidden fixed inset-x-0 top-20 z-[200] flex items-center justify-center p-6">
+        <div class="glass p-6 rounded-3xl text-center w-full max-w-xs border-b-4 border-yellow-500">
+            <h2 id="bet-title" class="text-lg font-black mb-4 text-white uppercase italic">---</h2>
+            <div id="bet-options" class="grid grid-cols-4 gap-2"></div>
+            <p id="bet-forbidden" class="text-red-500 text-[10px] font-bold mt-4 uppercase italic hidden">⚠️ PROHIBIDO <span id="forbidden-val"></span></p>
+        </div>
     </div>
 
     <div id="screen-bolo-setup" class="hidden min-h-screen p-6 max-w-md mx-auto bg-[#064e3b]">
         <h2 class="text-3xl font-black text-yellow-500 mb-6 italic uppercase text-center">Configurar BOLO</h2>
         <div class="glass p-6 rounded-3xl space-y-4">
             <div class="flex gap-2">
-                <input type="text" id="b-name-input" class="flex-1 p-4 input-dark font-bold uppercase" placeholder="NOMBRE JUGADOR">
-                <button onclick="addPBolo()" class="bg-yellow-600 px-6 rounded-xl font-bold text-2xl">+</button>
+                <input type="text" id="p-name-bolo" class="flex-1 p-4 input-dark font-bold uppercase" placeholder="NOMBRE JUGADOR">
+                <button onclick="addPlayerBolo()" class="bg-yellow-600 px-6 rounded-xl font-bold text-2xl">+</button>
             </div>
-            <ul id="b-list" class="space-y-2 border-l-2 border-yellow-500 pl-4"></ul>
-            <button id="b-start-btn" onclick="startBolo()" class="hidden w-full bg-green-700 py-4 rounded-2xl font-black uppercase">Empezar</button>
+            <ul id="p-list-bolo" class="space-y-2 border-l-2 border-yellow-500 pl-4"></ul>
+            <button id="btn-start-bolo" onclick="startGameBolo()" class="hidden w-full bg-green-700 py-4 rounded-2xl font-black uppercase">Empezar</button>
             <button onclick="showScreen('screen-menu')" class="w-full text-zinc-400 text-sm uppercase">Volver</button>
         </div>
     </div>
@@ -78,23 +78,31 @@
             <p id="b-round-label" class="text-xs text-yellow-500 uppercase font-bold"></p>
             <h2 id="b-cards-label" class="text-5xl font-black text-white"></h2>
         </div>
-        <div class="glass p-4 rounded-2xl" id="b-input-area"></div>
+        <div class="glass p-4 rounded-2xl"><div id="b-players-actions" class="space-y-3"></div></div>
         <button id="b-main-btn" onclick="processPhaseBolo()" class="w-full bg-yellow-600 py-5 rounded-2xl font-black text-xl uppercase mt-4">Confirmar</button>
     </div>
 
     <div id="modal-ranking" class="hidden fixed inset-0 z-[300] bg-black/95 flex items-center justify-center p-6">
         <div class="glass w-full max-w-sm p-6 rounded-3xl text-center">
             <h2 class="text-2xl font-black mb-6 text-yellow-500 italic uppercase">Clasificación</h2>
-            <div id="ranking-table" class="space-y-3 mb-6"></div>
+            <table class="w-full mb-6 text-white text-sm"><tbody id="ranking-table"></tbody></table>
             <button onclick="nextRoundBolo()" class="w-full bg-white text-black py-4 rounded-2xl font-black uppercase">Siguiente Ronda</button>
         </div>
     </div>
 
     <script>
-        // --- VARIABLES GLOBALES ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyBUXvMwtXc2S_lNghaWOPwvKF5Z7EDB2lQ",
+            authDomain: "pochaonline-ebbc1.firebaseapp.com",
+            databaseURL: "https://pochaonline-ebbc1-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "pochaonline-ebbc1"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
         let myName = ""; let roomCode = ""; let roomRef = null; let gameState = null;
-        let pBolo = []; let curBoloIdx = 0; let isBettingBolo = true;
-        const emojis = {OROS:'🟡', COPAS:'🍷', ESPADAS:'⚔️', BASTOS:'🪵'};
+        let playersBolo = []; let roundsSeq = []; let currentIdx = 0; let isBettingBolo = true;
+        const emojis = {'OROS': '🟡', 'COPAS': '🍷', 'ESPADAS': '⚔️', 'BASTOS': '🪵'};
 
         function showScreen(id) {
             document.querySelectorAll('body > div').forEach(div => div.classList.add('hidden'));
@@ -102,7 +110,7 @@
         }
 
         function getPochaSeq(nP) {
-            let s = []; let max = Math.floor(40/nP);
+            let s = []; const max = Math.floor(40 / nP);
             for(let i=0; i<nP; i++) s.push(1);
             for(let i=2; i<max; i++) s.push(i);
             for(let i=0; i<nP; i++) s.push(max);
@@ -111,20 +119,24 @@
             return s;
         }
 
-        // --- LÓGICA ONLINE ---
-        function initOnline() {
-            const config = { apiKey: "AIzaSyBUXvMwtXc2S_lNghaWOPwvKF5Z7EDB2lQ", databaseURL: "https://pochaonline-ebbc1-default-rtdb.europe-west1.firebasedatabase.app" };
-            if (!firebase.apps.length) firebase.initializeApp(config);
-            myName = document.getElementById('on-name').value.trim().toUpperCase();
-            roomCode = document.getElementById('on-room').value.trim().toUpperCase();
+        /* --- LÓGICA ONLINE MEJORADA --- */
+        function joinOnline() {
+            myName = document.getElementById('input-name').value.trim().toUpperCase();
+            roomCode = document.getElementById('input-room').value.trim().toUpperCase();
             if(!myName || !roomCode) return;
 
-            roomRef = firebase.database().ref('rooms/' + roomCode);
-            roomRef.on('value', snap => { gameState = snap.val(); if(gameState) renderOnline(); });
+            roomRef = db.ref('rooms/' + roomCode);
+            roomRef.on('value', snap => {
+                gameState = snap.val();
+                if(gameState) renderOnline();
+            });
+
             roomRef.once('value', snap => {
-                let d = snap.val() || { players: [], roundIdx: 0, turn: 0, phase: 'LOBBY' };
-                if(!d.players.find(p => p.name === myName)) d.players.push({ name: myName, score: 0, bet: -1, made: 0, hand: [], played: "" });
-                roomRef.set(d);
+                let data = snap.val() || { players: [], roundIdx: 0, turn: 0, phase: 'LOBBY' };
+                if(!data.players.find(p => p.name === myName)) {
+                    data.players.push({ name: myName, score: 0, bet: -1, made: 0, hand: [], played: "" });
+                }
+                roomRef.set(data);
                 showScreen('screen-game');
             });
         }
@@ -133,143 +145,176 @@
             const me = gameState.players.find(p => p.name === myName);
             const activeP = gameState.players[gameState.turn];
             const isMyTurn = (activeP && activeP.name === myName);
-            const nCards = getPochaSeq(gameState.players.length)[gameState.roundIdx] || 1;
+            const seq = getPochaSeq(gameState.players.length);
+            const roundCards = seq[gameState.roundIdx] || 1;
 
-            document.getElementById('on-scores').innerHTML = gameState.players.map(p => `<div class="${activeP && p.name===activeP.name?'text-yellow-400 font-bold':''}">${p.name}: ${p.score} [${p.made}/${p.bet<0?'?':p.bet}]</div>`).join('');
-            document.getElementById('on-trump').innerHTML = gameState.trump ? drawCard(gameState.trump) : '';
-            document.getElementById('on-table').innerHTML = gameState.players.map((p, i) => {
+            // Marcador
+            document.getElementById('ui-scores').innerHTML = gameState.players.map(p => 
+                `<div class="${activeP && p.name===activeP.name ? 'text-yellow-400 font-bold' : ''}">${p.name}: ${p.score} [${p.made}/${p.bet < 0 ? '?' : p.bet}]</div>`).join('');
+
+            // Triunfo
+            document.getElementById('ui-trump').innerHTML = gameState.trump ? createCardHTML(gameState.trump) : '';
+
+            // Mesa
+            document.getElementById('ui-board').innerHTML = gameState.players.map((p, i) => {
                 if(!p.played) return '';
-                let a = i * (360 / gameState.players.length);
-                return `<div class="played-card" style="transform: rotate(${a}deg) translateY(-80px) rotate(-${a}deg)">${drawCard(p.played)}</div>`;
+                const ang = i * (360 / gameState.players.length);
+                return `<div class="played-card" style="transform: rotate(${ang}deg) translateY(-75px) rotate(-${ang}deg)">${createCardHTML(p.played)}</div>`;
             }).join('');
 
-            // Mano visible siempre (para apostar y para jugar)
-            const handDiv = document.getElementById('on-hand');
+            // Mano (SIEMPRE VISIBLE si hay cartas)
+            const handDiv = document.getElementById('ui-hand');
             handDiv.innerHTML = "";
-            if(me && me.hand && (gameState.phase === 'PLAYING' || gameState.phase === 'BETTING')) {
+            if(me && me.hand && me.hand.length > 0) {
                 me.hand.forEach((c, i) => {
-                    let div = document.createElement('div'); div.innerHTML = drawCard(c);
-                    let cardEl = div.firstChild;
-                    if(isMyTurn && gameState.phase === 'PLAYING') { cardEl.classList.add('card-active'); cardEl.onclick = () => playCardOnline(i); }
-                    handDiv.appendChild(cardUi = cardEl);
+                    const el = document.createElement('div'); el.innerHTML = createCardHTML(c);
+                    const cardUi = el.firstChild;
+                    if(isMyTurn && gameState.phase === 'PLAYING') {
+                        cardUi.classList.add('card-active');
+                        cardUi.onclick = () => playCardOnline(i);
+                    }
+                    handDiv.appendChild(cardUi);
                 });
             }
 
-            // Modal Apuestas
-            const betModal = document.getElementById('on-bet-modal');
+            // Apuestas
+            const modalBet = document.getElementById('modal-bet');
             if(gameState.phase === 'BETTING') {
-                betModal.classList.remove('hidden');
-                document.getElementById('bet-title').innerText = isMyTurn ? "TU TURNO: ¿CUÁNTAS?" : "ESPERANDO A " + (activeP?activeP.name:'');
-                let btns = document.getElementById('bet-btns'); btns.innerHTML = '';
+                modalBet.classList.remove('hidden');
+                document.getElementById('bet-title').innerText = isMyTurn ? "TU TURNO: ¿CUÁNTAS?" : "ESPERANDO A " + (activeP ? activeP.name : "...");
+                const opts = document.getElementById('bet-options'); opts.innerHTML = "";
                 if(isMyTurn) {
-                    let done = gameState.players.filter(p => p.bet !== -1).length;
-                    let sum = gameState.players.reduce((s, p) => s + (p.bet<0?0:p.bet), 0);
-                    let forbidden = (done === gameState.players.length - 1) ? (nCards - sum) : -1;
+                    const done = gameState.players.filter(p => p.bet !== -1).length;
+                    const sum = gameState.players.reduce((a, b) => a + (b.bet === -1 ? 0 : b.bet), 0);
+                    const forbidden = (done === gameState.players.length - 1) ? (roundCards - sum) : -1;
                     document.getElementById('bet-forbidden').classList.toggle('hidden', forbidden < 0);
                     if(forbidden >= 0) document.getElementById('forbidden-val').innerText = forbidden;
-                    for(let i=0; i<=nCards; i++) {
-                        let b = document.createElement('button'); b.innerText = i;
-                        b.className = `p-2 rounded-lg font-bold ${i===forbidden?'bg-zinc-800 text-zinc-600 pointer-events-none':'bg-yellow-500 text-black'}`;
-                        b.onclick = () => { gameState.players[gameState.turn].bet = i; gameState.turn = (gameState.turn+1)%gameState.players.length; if(gameState.players.every(p=>p.bet!==-1)) gameState.phase='PLAYING'; roomRef.set(gameState); };
-                        btns.appendChild(b);
+                    for(let i=0; i <= roundCards; i++) {
+                        const btn = document.createElement('button');
+                        btn.className = `p-3 rounded-lg font-bold ${i === forbidden ? 'bg-zinc-800 text-zinc-500 pointer-events-none' : 'bg-yellow-500 text-black'}`;
+                        btn.innerText = i; btn.onclick = () => submitBet(i);
+                        opts.appendChild(btn);
                     }
                 }
-            } else betModal.classList.add('hidden');
+            } else modalBet.classList.add('hidden');
 
-            const st = document.getElementById('on-status');
+            const status = document.getElementById('status-text');
             if(gameState.phase === 'LOBBY') {
-                st.innerHTML = (gameState.players[0].name === myName) ? `<button onclick="dealOnline()" class="bg-green-600 px-6 py-1 rounded-full font-bold">REPARTIR ${nCards}</button>` : "ESPERANDO REPARTO...";
-            } else st.innerText = isMyTurn ? "¡TE TOCA!" : "TURNO DE " + (activeP?activeP.name:'');
+                status.innerHTML = (gameState.players[0].name === myName) ? `<button onclick="dealOnline()" class="bg-green-600 px-6 py-1 rounded-full uppercase font-bold">REPARTIR ${roundCards}</button>` : "ESPERANDO REPARTO...";
+            } else {
+                status.innerText = isMyTurn ? "TU TURNO" : "TURNO DE " + (activeP ? activeP.name : "...");
+            }
+        }
+
+        function submitBet(n) {
+            gameState.players[gameState.turn].bet = n;
+            gameState.turn = (gameState.turn + 1) % gameState.players.length;
+            if(gameState.players.every(p => p.bet !== -1)) {
+                gameState.phase = 'PLAYING';
+                gameState.firstSuit = "";
+            }
+            roomRef.set(gameState);
         }
 
         function dealOnline() {
-            let deck = []; ['OROS','COPAS','ESPADAS','BASTOS'].forEach(s => [1,2,3,4,5,6,7,10,11,12].forEach(v => deck.push({s,v})));
+            const seq = getPochaSeq(gameState.players.length);
+            const n = seq[gameState.roundIdx];
+            const deck = [];
+            ['OROS','COPAS','ESPADAS','BASTOS'].forEach(s => [1,2,3,4,5,6,7,10,11,12].forEach(v => deck.push({s,v})));
             deck.sort(() => Math.random() - 0.5);
-            let n = getPochaSeq(gameState.players.length)[gameState.roundIdx];
             gameState.players.forEach(p => { p.hand = deck.splice(0, n); p.bet = -1; p.made = 0; p.played = ""; });
             gameState.trump = deck.pop(); gameState.phase = 'BETTING'; gameState.turn = 0; gameState.cardsPlayed = 0;
             roomRef.set(gameState);
         }
 
         function playCardOnline(idx) {
-            let meIdx = gameState.players.findIndex(p => p.name === myName);
-            let c = gameState.players[meIdx].hand.splice(idx, 1)[0];
-            gameState.players[meIdx].played = c;
-            if(!gameState.firstSuit) gameState.firstSuit = c.s;
+            const meIdx = gameState.players.findIndex(p => p.name === myName);
+            const card = gameState.players[meIdx].hand.splice(idx, 1)[0];
+            gameState.players[meIdx].played = card;
+            if(!gameState.firstSuit) gameState.firstSuit = card.s;
             gameState.cardsPlayed = (gameState.cardsPlayed || 0) + 1;
+            
+            // Sincronización: Solo si es el último jugador, lanzamos el resolve
             if(gameState.cardsPlayed === gameState.players.length) {
-                roomRef.set(gameState).then(() => setTimeout(resolveBaza, 1500));
+                roomRef.set(gameState).then(() => {
+                    setTimeout(resolveBazaOnline, 2000); // Pausa para ver la jugada
+                });
             } else {
                 gameState.turn = (gameState.turn + 1) % gameState.players.length;
                 roomRef.set(gameState);
             }
         }
 
-        function resolveBaza() {
-            let winIdx = 0, best = -1;
+        function resolveBazaOnline() {
+            let winIdx = 0; let best = -1;
+            const trumpSuit = gameState.trump.s;
+            const firstSuit = gameState.firstSuit;
+
             gameState.players.forEach((p, i) => {
-                let v = p.played.v; if(v===1) v=20; if(v===3) v=15;
-                let pow = (p.played.s === gameState.trump.s) ? v+100 : (p.played.s === gameState.firstSuit ? v : 0);
-                if(pow > best) { best = pow; winIdx = i; }
+                let v = p.played.v; if(v === 1) v = 20; if(v === 3) v = 15;
+                let power = (p.played.s === trumpSuit) ? v + 100 : (p.played.s === firstSuit ? v : 0);
+                if(power > best) { best = power; winIdx = i; }
             });
+
             gameState.players[winIdx].made++;
             gameState.players.forEach(p => p.played = "");
             gameState.turn = winIdx; gameState.firstSuit = ""; gameState.cardsPlayed = 0;
+
             if(gameState.players[0].hand.length === 0) {
-                gameState.players.forEach(p => { if(p.bet === p.made) p.score += (10+p.made*5); else p.score -= 5; });
-                gameState.roundIdx++; gameState.phase = 'LOBBY';
+                gameState.players.forEach(p => {
+                    if(p.bet === p.made) p.score += (10 + p.made * 5); else p.score -= 5;
+                });
+                gameState.roundIdx++;
+                gameState.phase = 'LOBBY';
             }
             roomRef.set(gameState);
         }
 
-        function drawCard(c) {
-            let v = c.v === 1 ? 'A' : (c.v === 10 ? 'S' : (c.v === 11 ? 'C' : (c.v === 12 ? 'R' : c.v)));
-            return `<div class="card"><div>${v}</div><div class="text-2xl">${emojis[c.s]}</div><div class="rotate-180">${v}</div></div>`;
+        function createCardHTML(c) {
+            if(!c) return '';
+            const val = c.v === 1 ? 'A' : (c.v === 10 ? 'S' : (c.v === 11 ? 'C' : (c.v === 12 ? 'R' : c.v)));
+            return `<div class="card"><div>${val}</div><div class="text-2xl">${emojis[c.s]}</div><div class="rotate-180">${val}</div></div>`;
         }
 
-        // --- LÓGICA BOLO ---
-        function addPBolo() {
-            let n = document.getElementById('b-name-input').value.toUpperCase();
-            if(n) {
-                pBolo.push({name: n, score: 0, bet: 0, last: 0});
-                document.getElementById('b-list').innerHTML += `<li class="font-bold">👤 ${n}</li>`;
-                document.getElementById('b-name-input').value = "";
-                if(pBolo.length >= 2) document.getElementById('b-start-btn').classList.remove('hidden');
+        // --- FUNCIONES BOLO (Mismas del paso anterior) ---
+        function addPlayerBolo() {
+            const val = document.getElementById('p-name-bolo').value.trim().toUpperCase();
+            if(val) {
+                playersBolo.push({ name: val, score: 0, bet: 0, lastDiff: 0 });
+                document.getElementById('p-name-bolo').value = '';
+                document.getElementById('p-list-bolo').innerHTML = playersBolo.map(p => `<li class="font-bold">👤 ${p.name}</li>`).join('');
+                if(playersBolo.length >= 2) document.getElementById('btn-start-bolo').classList.remove('hidden');
             }
         }
-        function startBolo() { showScreen('screen-bolo-game'); updateBoloUI(); }
+        function startGameBolo() { roundsSeq = getPochaSeq(playersBolo.length); currentIdx = 0; isBettingBolo = true; showScreen('screen-bolo-game'); updateBoloUI(); }
         function updateBoloUI() {
-            let n = getPochaSeq(pBolo.length)[curBoloIdx];
-            document.getElementById('b-round-label').innerText = `RONDA ${curBoloIdx+1}`;
-            document.getElementById('b-cards-label').innerText = `${n} CARTAS`;
-            document.getElementById('b-input-area').innerHTML = pBolo.map((p, i) => `
+            const cards = roundsSeq[currentIdx];
+            document.getElementById('b-round-label').innerText = `RONDA ${currentIdx+1} / ${roundsSeq.length}`;
+            document.getElementById('b-cards-label').innerText = `${cards} ${cards===1?'CARTA':'CARTAS'}`;
+            document.getElementById('b-players-actions').innerHTML = playersBolo.map((p, i) => `
                 <div class="flex justify-between items-center p-3 border-b border-white/10">
-                    <span class="font-bold">${p.name} (${p.score})</span>
-                    <input type="number" id="bi-${i}" class="w-16 p-2 input-dark text-center font-bold text-xl">
+                    <span class="font-bold text-sm">${p.name} ${!isBettingBolo ? `<span class="text-blue-400 block text-[10px]">Pidió ${p.bet}</span>` : ''}</span>
+                    <input type="number" id="b-input-${i}" class="w-16 p-2 input-dark text-center font-bold text-xl">
                 </div>`).join('');
         }
         function processPhaseBolo() {
             if(isBettingBolo) {
-                pBolo.forEach((p, i) => p.bet = parseInt(document.getElementById(`bi-${i}`).value) || 0);
-                isBettingBolo = false;
-                document.getElementById('b-main-btn').innerText = "Confirmar Ganadas";
-                updateBoloUI();
+                playersBolo.forEach((p, i) => p.bet = parseInt(document.getElementById(`b-input-${i}`).value) || 0);
+                isBettingBolo = false; updateBoloUI();
             } else {
-                pBolo.forEach((p, i) => {
-                    let m = parseInt(document.getElementById(`bi-${i}`).value) || 0;
-                    p.last = (m === p.bet) ? (10 + m * 5) : -5;
-                    p.score += p.last;
+                playersBolo.forEach((p, i) => {
+                    const m = parseInt(document.getElementById(`b-input-${i}`).value) || 0;
+                    p.lastDiff = (m === p.bet) ? (10 + m * 5) : -5; p.score += p.lastDiff;
                 });
-                document.getElementById('ranking-table').innerHTML = [...pBolo].sort((a,b)=>b.score-a.score).map((p, i) => `
-                    <div class="flex justify-between"><span>${i+1}. ${p.name}</span><b>${p.score} (${p.last>0?'+':''}${p.last})</b></div>`).join('');
+                const sorted = [...playersBolo].sort((a,b) => b.score - a.score);
+                document.getElementById('ranking-table').innerHTML = sorted.map((p, i) => `<tr><td class="py-2 text-left">${i+1}. ${p.name}</td><td class="py-2 text-right font-bold">${p.score}</td></tr>`).join('');
                 document.getElementById('modal-ranking').classList.remove('hidden');
             }
         }
         function nextRoundBolo() {
             document.getElementById('modal-ranking').classList.add('hidden');
-            curBoloIdx++; isBettingBolo = true;
-            document.getElementById('b-main-btn').innerText = "Confirmar Apuestas";
-            if(curBoloIdx < getPochaSeq(pBolo.length).length) updateBoloUI(); else location.reload();
+            if(currentIdx < roundsSeq.length - 1) { currentIdx++; isBettingBolo = true; updateBoloUI(); }
+            else location.reload();
         }
     </script>
 </body>
