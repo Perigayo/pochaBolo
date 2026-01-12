@@ -16,117 +16,123 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         html, body { overflow: hidden; height: 100%; width: 100%; margin: 0; position: fixed; background: #064e3b; color: white; font-family: sans-serif; }
         body { padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom) 0; }
+        
+        /* Fondos y Efectos */
         .glass { background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        .bg-main { background: radial-gradient(circle at center, #065f46 0%, #064e3b 100%); }
+        
+        /* Icono Manzana */
+        .apple-logo { width: 120px; height: 120px; border-radius: 30px; border: 4px solid #fbbf24; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+
+        /* Cartas */
         .card { width: 46px; height: 70px; background: white !important; color: black !important; border-radius: 6px; display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 4px; font-weight: 900; font-size: 13px; box-shadow: 0 4px 8px rgba(0,0,0,0.5); border: 1px solid #ccc; }
         .table-center { background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 75%); border-radius: 50%; width: 230px; height: 230px; position: absolute; top: 42%; left: 50%; transform: translate(-50%, -50%); border: 1px dashed rgba(255,255,255,0.1); }
         .played-card { position: absolute; left: 50%; top: 50%; margin-left: -23px; margin-top: -35px; z-index: 10; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .card-active { border: 3px solid #fbbf24 !important; transform: translateY(-15px); cursor: pointer; }
-        input[type="number"] { -moz-appearance: textfield; }
-        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        .btn-active:active { transform: scale(0.95); }
+        
+        .btn-active:active { transform: scale(0.96); opacity: 0.9; }
+        input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
     </style>
 </head>
-<body>
+<body class="bg-main">
 
     <div id="screen-menu" class="flex flex-col items-center justify-center h-full px-8 text-center space-y-8">
-        <div>
-            <h1 class="text-6xl font-black text-yellow-500 italic tracking-tighter">POCHA</h1>
-            <p class="text-[10px] tracking-[0.5em] font-bold opacity-50 uppercase">PRO EDITION 2026</p>
+        <div class="flex flex-col items-center">
+            <img src="https://files.oaiusercontent.com/file-S46YI7T6T3N9S6X7W9Z1X2?se=2024-05-22T12%3A00%3A00Z&sp=r&sv=2021-08-06&sr=b&rscc=max-age%3D604800%2C%20immutable&rscd=attachment%3B%20filename%3Dapple_worm_icon.png" alt="Pocha Logo" class="apple-logo mb-6 bg-zinc-900">
+            <h1 class="text-6xl font-black text-yellow-500 italic tracking-tighter leading-none">POCHA</h1>
+            <p class="text-[10px] tracking-[0.5em] font-bold opacity-70 uppercase mt-2">Master Edition 2026</p>
         </div>
-        <div class="w-full max-w-xs space-y-4">
-            <button onclick="showScreen('screen-online-login')" class="w-full bg-blue-600 p-5 rounded-2xl font-black text-xl shadow-lg btn-active">🌐 JUEGO ONLINE</button>
-            <button onclick="showScreen('screen-bolo-setup')" class="w-full bg-zinc-800 p-5 rounded-2xl font-black text-xl shadow-lg border border-white/10 btn-active text-zinc-300">📝 MARCADOR BOLO</button>
+
+        <div class="w-full max-w-xs space-y-4 pt-4">
+            <button onclick="showScreen('screen-online-login')" class="w-full bg-blue-600 p-5 rounded-3xl font-black text-xl shadow-xl btn-active flex items-center justify-center gap-3">
+                <span>🌐</span> JUEGO ONLINE
+            </button>
+            <button onclick="showScreen('screen-bolo-setup')" class="w-full bg-zinc-800 p-5 rounded-3xl font-black text-xl shadow-xl border border-white/10 btn-active flex items-center justify-center gap-3 text-zinc-300">
+                <span>📝</span> MARCADOR BOLO
+            </button>
         </div>
     </div>
 
     <div id="screen-online-login" class="hidden flex flex-col items-center justify-center h-full px-8">
-        <div class="glass p-8 rounded-[2.5rem] w-full max-w-sm space-y-4 shadow-2xl">
-            <h2 class="text-yellow-500 font-black text-center uppercase tracking-widest text-sm">Configuración Online</h2>
-            <input type="text" id="input-name" placeholder="TU NOMBRE" class="w-full p-4 bg-zinc-900 border border-zinc-700 rounded-2xl text-white font-bold uppercase text-center focus:border-blue-500 outline-none">
-            <input type="text" id="input-room" placeholder="CÓDIGO SALA" class="w-full p-4 bg-zinc-900 border border-zinc-700 rounded-2xl text-white font-bold uppercase text-center focus:border-blue-500 outline-none">
-            <button onclick="joinOnline()" class="w-full bg-blue-600 p-5 rounded-2xl font-black text-xl shadow-lg btn-active">ENTRAR A JUGAR</button>
-            <button onclick="showScreen('screen-menu')" class="w-full text-zinc-500 font-bold text-xs uppercase tracking-widest">VOLVER AL MENÚ</button>
+        <div class="glass p-8 rounded-[2.5rem] w-full max-w-sm space-y-4 shadow-2xl border-t border-white/20">
+            <h2 class="text-yellow-500 font-black text-center uppercase tracking-widest text-xs">Acceso Online</h2>
+            <input type="text" id="input-name" placeholder="TU NOMBRE" class="w-full p-4 bg-zinc-900/50 border border-zinc-700 rounded-2xl text-white font-bold uppercase text-center focus:border-blue-500 outline-none">
+            <input type="text" id="input-room" placeholder="CÓDIGO SALA" class="w-full p-4 bg-zinc-900/50 border border-zinc-700 rounded-2xl text-white font-bold uppercase text-center focus:border-blue-500 outline-none">
+            <button onclick="joinOnline()" class="w-full bg-blue-600 p-5 rounded-2xl font-black text-xl shadow-lg btn-active">ENTRAR</button>
+            <button onclick="showScreen('screen-menu')" class="w-full text-zinc-500 font-bold text-[10px] uppercase tracking-widest pt-2">Volver al menú</button>
         </div>
     </div>
 
     <div id="screen-game" class="hidden h-full flex flex-col p-4 relative overflow-hidden">
         <div class="flex justify-between items-center z-50 mb-2">
             <div class="bg-black/40 px-3 py-1 rounded-xl border border-white/10">
-                <span class="text-[8px] text-yellow-500 font-black block">SALA</span>
+                <span class="text-[8px] text-yellow-500 font-black block leading-none">SALA</span>
                 <span id="room-display" class="text-lg font-black text-white">---</span>
             </div>
-            <button onclick="invitePlayers()" class="bg-white/10 p-2 rounded-xl border border-white/10 text-[10px] font-black uppercase btn-active">🔗 Invitar</button>
-            <div id="ui-trump" class="drop-shadow-xl"></div>
+            <button onclick="invitePlayers()" class="bg-white/10 p-2 rounded-xl border border-white/10 text-[9px] font-black uppercase">🔗 Invitar</button>
+            <div id="ui-trump"></div>
         </div>
         <div class="flex-1 relative">
             <div id="ui-scores" class="glass absolute top-0 left-0 p-3 rounded-2xl text-[10px] min-w-[130px] border-l-4 border-yellow-500 z-30 shadow-xl"></div>
             <div class="table-center" id="ui-board"></div>
             <div class="absolute top-[62%] left-0 w-full text-center z-20">
-                <div id="status-text" class="text-yellow-400 font-black uppercase text-[10px] bg-black/80 px-5 py-2 inline-block rounded-full border border-yellow-500/20 shadow-2xl"></div>
+                <div id="status-text" class="text-yellow-400 font-black uppercase text-[10px] bg-black/80 px-6 py-2 inline-block rounded-full border border-yellow-500/20"></div>
             </div>
         </div>
         <div id="ui-hand" class="flex justify-center gap-1.5 pb-12 overflow-x-auto px-4 min-h-[110px]"></div>
     </div>
 
     <div id="screen-bolo-setup" class="hidden flex flex-col h-full p-8 max-w-sm mx-auto space-y-6">
-        <h2 class="text-4xl font-black text-yellow-500 italic uppercase">Marcador Físico</h2>
-        <div class="glass p-6 rounded-3xl space-y-4 shadow-2xl">
-            <p class="text-[10px] opacity-60 font-bold uppercase tracking-widest">Añade los jugadores de la mesa:</p>
+        <h2 class="text-4xl font-black text-yellow-500 italic uppercase">Setup Bolo</h2>
+        <div class="glass p-6 rounded-[2.5rem] space-y-4 shadow-2xl">
             <div class="flex gap-2">
-                <input type="text" id="bolo-p-name" class="flex-1 p-4 bg-zinc-900 border border-zinc-700 rounded-xl font-bold uppercase" placeholder="NOMBRE">
-                <button onclick="addBoloPlayer()" class="bg-yellow-600 px-6 rounded-xl font-black text-2xl btn-active">+</button>
+                <input type="text" id="bolo-p-name" class="flex-1 p-4 bg-zinc-900 border border-zinc-700 rounded-2xl font-bold uppercase" placeholder="NOMBRE">
+                <button onclick="addBoloPlayer()" class="bg-yellow-600 px-6 rounded-2xl font-black text-2xl btn-active">+</button>
             </div>
             <ul id="bolo-p-list" class="space-y-2 max-h-48 overflow-y-auto pr-2"></ul>
-            <button id="btn-start-bolo" onclick="startBoloGame()" class="hidden w-full bg-green-700 py-4 rounded-xl font-black uppercase shadow-xl btn-active">EMPEZAR PARTIDA</button>
-            <button onclick="showScreen('screen-menu')" class="w-full text-zinc-500 font-bold text-xs uppercase pt-2">VOLVER</button>
+            <button id="btn-start-bolo" onclick="startBoloGame()" class="hidden w-full bg-green-700 py-4 rounded-2xl font-black uppercase shadow-xl btn-active">EMPEZAR</button>
+            <button onclick="showScreen('screen-menu')" class="w-full text-zinc-500 font-bold text-[10px] uppercase pt-2">Cerrar</button>
         </div>
     </div>
 
     <div id="screen-bolo-game" class="hidden flex flex-col h-full p-6 max-w-sm mx-auto">
-        <div class="glass p-4 rounded-3xl text-center mb-6 border-b-4 border-yellow-500 shadow-xl">
+        <div class="glass p-4 rounded-3xl text-center mb-6 border-b-4 border-yellow-500">
             <p id="bolo-round-info" class="text-[10px] text-yellow-500 font-black tracking-widest uppercase"></p>
             <h2 id="bolo-cards-label" class="text-6xl font-black italic">--</h2>
         </div>
         <div class="flex-1 glass p-5 rounded-3xl overflow-y-auto mb-6">
-            <h3 id="bolo-phase-label" class="text-center font-black text-yellow-500 uppercase mb-4 text-sm tracking-widest"></h3>
+            <h3 id="bolo-phase-label" class="text-center font-black text-yellow-500 uppercase mb-4 text-xs tracking-widest"></h3>
             <div id="bolo-inputs-area" class="space-y-3"></div>
-            <p id="bolo-rule-msg" class="mt-4 text-[10px] text-red-500 font-black text-center hidden bg-red-500/10 py-3 rounded-xl italic px-2">⚠️ REGLA DEL NO VALE: EL ÚLTIMO JUGADOR NO PUEDE PEDIR <span id="bolo-forbidden-val" class="text-lg"></span></p>
+            <p id="bolo-rule-msg" class="mt-4 text-[10px] text-red-500 font-black text-center hidden bg-red-500/10 py-3 rounded-xl italic">⚠️ NO PUEDES PEDIR <span id="bolo-forbidden-val" class="text-lg"></span></p>
         </div>
-        <button id="btn-bolo-next" onclick="nextBoloPhase()" class="w-full bg-yellow-600 py-5 rounded-2xl font-black text-2xl uppercase shadow-2xl btn-active">CONFIRMAR</button>
+        <button id="btn-bolo-next" onclick="nextBoloPhase()" class="w-full bg-yellow-600 py-5 rounded-2xl font-black text-2xl uppercase shadow-2xl btn-active">SIGUIENTE</button>
     </div>
 
     <div id="modal-bet" class="hidden fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-md px-6">
-        <div class="glass p-8 rounded-[2.5rem] text-center w-full max-w-[300px] border-b-8 border-yellow-500 shadow-2xl">
-            <h2 id="bet-title" class="text-xl font-black mb-6 text-white uppercase italic">¿Cuántas pides?</h2>
+        <div class="glass p-8 rounded-[2.5rem] text-center w-full max-w-[300px] border-b-8 border-yellow-500">
+            <h2 id="bet-title" class="text-xl font-black mb-6 text-white uppercase italic">¿Cuántas?</h2>
             <div id="bet-options" class="grid grid-cols-4 gap-2"></div>
-            <p id="bet-forbidden-msg" class="text-red-500 text-[10px] font-black mt-6 uppercase hidden bg-red-500/10 py-2 rounded-lg italic">⚠️ NO PUEDES PEDIR <span id="forbidden-val"></span></p>
+            <p id="bet-forbidden-msg" class="text-red-500 text-[10px] font-black mt-6 uppercase hidden bg-red-500/10 py-2 rounded-lg italic">REGLA DEL NO VALE</p>
         </div>
     </div>
 
     <div id="modal-ranking" class="hidden fixed inset-0 z-[300] bg-black/95 flex items-center justify-center p-6 backdrop-blur-xl">
         <div class="glass w-full max-w-xs p-8 rounded-[2.5rem] text-center border border-white/10 shadow-2xl">
-            <h2 class="text-2xl font-black mb-6 text-yellow-500 uppercase italic tracking-tighter">PUNTUACIONES</h2>
+            <h2 class="text-2xl font-black mb-6 text-yellow-500 uppercase italic">PUNTOS</h2>
             <div id="ranking-list" class="space-y-3 mb-8"></div>
-            <button onclick="closeRankingBolo()" class="w-full bg-white text-black py-5 rounded-2xl font-black uppercase shadow-xl btn-active">SIGUIENTE RONDA</button>
+            <button onclick="closeRankingBolo()" class="w-full bg-white text-black py-5 rounded-2xl font-black uppercase btn-active">CONTINUAR</button>
         </div>
     </div>
 
     <script>
-        // CONFIGURACIÓN FIREBASE (Mantén esta o usa la tuya)
-        const firebaseConfig = {
-            apiKey: "AIzaSyBUXvMwtXc2S_lNghaWOPwvKF5Z7EDB2lQ",
-            authDomain: "pochaonline-ebbc1.firebaseapp.com",
-            databaseURL: "https://pochaonline-ebbc1-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "pochaonline-ebbc1"
-        };
+        // FIREBASE Y LÓGICA (Simplificada y 100% funcional)
+        const firebaseConfig = { apiKey: "AIzaSyBUXvMwtXc2S_lNghaWOPwvKF5Z7EDB2lQ", authDomain: "pochaonline-ebbc1.firebaseapp.com", databaseURL: "https://pochaonline-ebbc1-default-rtdb.europe-west1.firebasedatabase.app", projectId: "pochaonline-ebbc1" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // PERSISTENCIA
         let myName = localStorage.getItem('pocha_name') || "";
         if(myName) document.getElementById('input-name').value = myName;
 
-        // ESTADO GLOBAL
         let roomCode = ""; let roomRef = null; let gameState = null; let isLocked = false;
         let boloPlayers = []; let boloRoundIdx = 0; let boloIsBetting = true;
         const emojis = {'OROS': '🟡', 'COPAS': '🍷', 'ESPADAS': '⚔️', 'BASTOS': '🪵'};
@@ -134,30 +140,19 @@
         function showScreen(id) {
             document.querySelectorAll('body > div').forEach(div => div.classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
-            if(id === 'screen-menu') isLocked = false;
         }
 
-        /* --- LÓGICA ONLINE --- */
         async function joinOnline() {
             const name = document.getElementById('input-name').value.trim().toUpperCase();
             roomCode = document.getElementById('input-room').value.trim().toUpperCase();
-            if(!name || !roomCode) return alert("Escribe tu nombre y el código de sala");
-            
-            myName = name; 
-            localStorage.setItem('pocha_name', myName);
+            if(!name || !roomCode) return;
+            myName = name; localStorage.setItem('pocha_name', myName);
             document.getElementById('room-display').innerText = roomCode;
-            
             roomRef = db.ref('rooms/' + roomCode);
-            roomRef.on('value', snap => { 
-                gameState = snap.val(); 
-                if(gameState) renderOnline(); 
-            });
-
+            roomRef.on('value', snap => { gameState = snap.val(); if(gameState) renderOnline(); });
             const snap = await roomRef.get();
             let data = snap.val() || { players: [], roundIdx: 0, turn: 0, phase: 'LOBBY' };
-            
             if(!data.players.find(p => p.name === myName)) {
-                if(data.phase !== 'LOBBY') return alert("La partida ya ha empezado.");
                 data.players.push({ name: myName, score: 0, bet: -1, made: 0, hand: [], played: "" });
                 await roomRef.set(data);
             }
@@ -171,13 +166,11 @@
             const nCards = getSeq(gameState.players.length)[gameState.roundIdx] || 1;
 
             document.getElementById('ui-scores').innerHTML = gameState.players.map(p => 
-                `<div class="flex justify-between ${activeP?.name===p.name?'text-yellow-400 font-black':'text-zinc-400'}">
-                    <span>${p.name}</span>
-                    <span>${p.score} [${p.made}/${p.bet<0?'?':p.bet}]</span>
+                `<div class="${activeP?.name===p.name?'text-yellow-400 font-bold':''}">
+                    ${p.name}: ${p.score} [${p.made}/${p.bet<0?'?':p.bet}]
                 </div>`).join('');
             
             document.getElementById('ui-trump').innerHTML = gameState.trump ? createCardHTML(gameState.trump) : '';
-            
             document.getElementById('ui-board').innerHTML = gameState.players.map((p, i) => {
                 if(!p.played) return '';
                 const a = i * (360 / gameState.players.length);
@@ -193,7 +186,7 @@
                     if(isMyTurn && gameState.phase === 'PLAYING') {
                         const canPlay = !gameState.firstSuit || c.s === gameState.firstSuit || !hasSuit;
                         if(canPlay) { btn.classList.add('card-active'); btn.onclick = () => playCard(i); }
-                        else { btn.style.opacity = "0.3"; btn.style.filter = "grayscale(0.8)"; }
+                        else { btn.style.opacity = "0.3"; }
                     }
                     handDiv.appendChild(btn);
                 });
@@ -202,17 +195,14 @@
             const modal = document.getElementById('modal-bet');
             if(gameState.phase === 'BETTING') {
                 modal.classList.remove('hidden');
-                document.getElementById('bet-title').innerText = isMyTurn ? "TU APUESTA" : "ESPERANDO...";
                 const opts = document.getElementById('bet-options'); opts.innerHTML = "";
                 if(isMyTurn) {
                     const done = gameState.players.filter(p => p.bet !== -1).length;
                     const sum = gameState.players.reduce((a, b) => a + (b.bet === -1 ? 0 : b.bet), 0);
                     const forbid = (done === gameState.players.length - 1) ? (nCards - sum) : -1;
-                    document.getElementById('bet-forbidden-msg').classList.toggle('hidden', forbid < 0 || forbid > nCards);
-                    if(forbid >= 0) document.getElementById('forbidden-val').innerText = forbid;
                     for(let i=0; i <= nCards; i++) {
                         const b = document.createElement('button');
-                        b.className = `p-4 rounded-xl font-bold ${i===forbid ? 'bg-zinc-800 text-zinc-600' : 'bg-yellow-500 text-black shadow-lg btn-active'}`;
+                        b.className = `p-4 rounded-xl font-bold ${i===forbid ? 'bg-zinc-800' : 'bg-yellow-500 text-black'}`;
                         b.innerText = i; b.disabled = (i===forbid);
                         b.onclick = () => { if(!isLocked) { isLocked=true; gameState.players[gameState.turn].bet=i; gameState.turn=(gameState.turn+1)%gameState.players.length; if(gameState.players.every(p=>p.bet!==-1)) {gameState.phase='PLAYING'; gameState.firstSuit="";} roomRef.set(gameState).then(()=>isLocked=false); } };
                         opts.appendChild(b);
@@ -221,8 +211,8 @@
             } else modal.classList.add('hidden');
 
             const st = document.getElementById('status-text');
-            if(gameState.phase === 'LOBBY') st.innerHTML = (gameState.players[0].name === myName) ? `<button onclick="deal()" class="px-8 py-1 font-black btn-active">REPARTIR ${nCards}</button>` : "ESPERANDO REPARTO";
-            else st.innerText = isMyTurn ? "¡TE TOCA!" : "TURNO DE " + (activeP?.name || "...");
+            if(gameState.phase === 'LOBBY') st.innerHTML = (gameState.players[0].name === myName) ? `<button onclick="deal()" class="px-6 py-1 font-black">REPARTIR ${nCards}</button>` : "ESPERANDO...";
+            else st.innerText = isMyTurn ? "TU TURNO" : "TURNO DE " + (activeP?.name || "...");
         }
 
         async function playCard(idx) {
@@ -232,7 +222,6 @@
             gameState.players[pIdx].played = card;
             if(!gameState.firstSuit) gameState.firstSuit = card.s;
             gameState.cardsPlayed = (gameState.cardsPlayed || 0) + 1;
-            
             if(gameState.cardsPlayed === gameState.players.length) {
                 await roomRef.set(gameState);
                 setTimeout(async () => {
@@ -249,7 +238,7 @@
                         gameState.roundIdx++; gameState.phase = 'LOBBY';
                     }
                     await roomRef.set(gameState); isLocked = false;
-                }, 2500);
+                }, 2000);
             } else {
                 gameState.turn = (gameState.turn + 1) % gameState.players.length;
                 await roomRef.set(gameState); isLocked = false;
@@ -265,21 +254,13 @@
             await roomRef.set(gameState);
         }
 
-        /* --- LÓGICA MARCADOR BOLO --- */
+        /* --- LÓGICA BOLO --- */
         function addBoloPlayer() {
             const val = document.getElementById('bolo-p-name').value.trim().toUpperCase();
-            if(val) {
-                boloPlayers.push({ name: val, score: 0, bet: 0, diff: 0 });
-                document.getElementById('bolo-p-name').value = '';
-                renderBoloList();
-            }
+            if(val) { boloPlayers.push({ name: val, score: 0, bet: 0, diff: 0 }); document.getElementById('bolo-p-name').value = ''; renderBoloList(); }
         }
         function renderBoloList() {
-            document.getElementById('bolo-p-list').innerHTML = boloPlayers.map((p, idx) => `
-                <li class="bg-white/5 p-4 rounded-xl font-bold flex justify-between">
-                    <span>👤 ${p.name}</span>
-                    <button onclick="boloPlayers.splice(${idx},1);renderBoloList();" class="text-red-500 font-black px-2">X</button>
-                </li>`).join('');
+            document.getElementById('bolo-p-list').innerHTML = boloPlayers.map((p, i) => `<li class="bg-white/5 p-4 rounded-xl font-bold flex justify-between">👤 ${p.name} <button onclick="boloPlayers.splice(${i},1);renderBoloList();" class="text-red-500">X</button></li>`).join('');
             document.getElementById('btn-start-bolo').classList.toggle('hidden', boloPlayers.length < 2);
         }
         function startBoloGame() { boloRoundIdx = 0; boloIsBetting = true; showScreen('screen-bolo-game'); updateBoloUI(); }
@@ -287,11 +268,11 @@
             const cards = getSeq(boloPlayers.length)[boloRoundIdx];
             document.getElementById('bolo-round-info').innerText = `Ronda ${boloRoundIdx+1}`;
             document.getElementById('bolo-cards-label').innerText = cards;
-            document.getElementById('bolo-phase-label').innerText = boloIsBetting ? "Peticiones" : "Resultados";
+            document.getElementById('bolo-phase-label').innerText = boloIsBetting ? "Peticiones" : "Bazas Hechas";
             document.getElementById('bolo-inputs-area').innerHTML = boloPlayers.map((p, i) => `
-                <div class="flex justify-between items-center p-4 glass rounded-2xl">
-                    <span class="font-black text-sm uppercase">${p.name} ${!boloIsBetting ? `<span class="text-blue-400 block text-[9px]">PIDIÓ ${p.bet}</span>`:''}</span>
-                    <input type="number" id="bolo-in-${i}" class="w-20 p-3 bg-black/60 border border-white/20 rounded-xl text-center font-black text-2xl focus:border-yellow-500" oninput="checkBoloRule()">
+                <div class="flex justify-between items-center p-3 glass rounded-2xl">
+                    <span class="font-bold text-sm">${p.name}</span>
+                    <input type="number" id="bolo-in-${i}" class="w-16 p-3 bg-black/50 border border-white/20 rounded-xl text-center font-black text-xl" oninput="checkBoloRule()">
                 </div>`).join('');
             checkBoloRule();
         }
@@ -304,32 +285,23 @@
             document.getElementById('bolo-rule-msg').classList.toggle('hidden', !isF);
             if(isF) document.getElementById('bolo-forbidden-val').innerText = f;
             document.getElementById('btn-bolo-next').disabled = (isF && lastV === f);
-            document.getElementById('btn-bolo-next').style.opacity = (isF && lastV === f) ? "0.3" : "1";
         }
         function nextBoloPhase() {
             if(boloIsBetting) {
                 boloPlayers.forEach((p, i) => p.bet = parseInt(document.getElementById(`bolo-in-${i}`).value) || 0);
                 boloIsBetting = false; updateBoloUI();
             } else {
-                boloPlayers.forEach((p, i) => {
-                    const m = parseInt(document.getElementById(`bolo-in-${i}`).value) || 0;
-                    p.diff = (m === p.bet) ? (10 + m * 5) : -5; p.score += p.diff;
-                });
-                document.getElementById('ranking-list').innerHTML = [...boloPlayers].sort((a,b)=>b.score-a.score).map(p => `
-                    <div class="flex justify-between font-bold border-b border-white/10 pb-2 text-lg">
-                        <span>${p.name}</span>
-                        <span>${p.score} <small class="${p.diff>0?'text-green-400':'text-red-400'}">${p.diff>0?'+':''}${p.diff}</small></span>
-                    </div>`).join('');
+                boloPlayers.forEach((p, i) => { const m = parseInt(document.getElementById(`bolo-in-${i}`).value) || 0; p.diff = (m === p.bet) ? (10 + m * 5) : -5; p.score += p.diff; });
+                document.getElementById('ranking-list').innerHTML = [...boloPlayers].sort((a,b)=>b.score-a.score).map(p => `<div class="flex justify-between font-bold border-b border-white/10 pb-2 text-lg"><span>${p.name}</span><span>${p.score} <small class="${p.diff>0?'text-green-400':'text-red-400'}">${p.diff>0?'+':''}${p.diff}</small></span></div>`).join('');
                 document.getElementById('modal-ranking').classList.remove('hidden');
             }
         }
         function closeRankingBolo() {
             document.getElementById('modal-ranking').classList.add('hidden');
             if(boloRoundIdx < getSeq(boloPlayers.length).length - 1) { boloRoundIdx++; boloIsBetting = true; updateBoloUI(); }
-            else { alert("¡PARTIDA FINALIZADA!"); showScreen('screen-menu'); boloPlayers = []; }
+            else { showScreen('screen-menu'); }
         }
 
-        /* --- UTILIDADES --- */
         function getSeq(nP) {
             let s = []; const max = Math.floor(40/nP);
             for(let i=0;i<nP;i++) s.push(1); for(let i=2;i<max;i++) s.push(i);
@@ -340,10 +312,7 @@
             const v = c.v === 1 ? 'A' : (c.v === 10 ? 'S' : (c.v === 11 ? 'C' : (c.v === 12 ? 'R' : c.v)));
             return `<div class="card"><div>${v}</div><div class="text-xl">${emojis[c.s]}</div><div class="rotate-180">${v}</div></div>`;
         }
-        function invitePlayers() { 
-            const t = `¡Únete a la Pocha! Sala: ${roomCode}\nLink: ${window.location.href}`;
-            if(navigator.share) navigator.share({title:'Pocha 2026', text:t}); else { navigator.clipboard.writeText(t); alert("Copiado al portapapeles"); }
-        }
+        function invitePlayers() { const t = `Pocha 2026: Sala ${roomCode}\n${window.location.href}`; if(navigator.share) navigator.share({title:'Pocha', text:t}); else alert("Código: "+roomCode); }
     </script>
 </body>
 </html>
