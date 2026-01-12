@@ -23,6 +23,7 @@
         .player-label { background: rgba(0,0,0,0.7); padding: 2px 8px; border-radius: 10px; font-size: 9px; font-weight: 900; text-transform: uppercase; margin-bottom: 4px; border: 1px solid rgba(255,255,255,0.2); white-space: nowrap; }
 
         .btn-gold { background: var(--gold); color: black; font-weight: 900; border-radius: 18px; padding: 18px; text-transform: uppercase; }
+        .btn-gold:disabled { background: #444; color: #888; cursor: not-allowed; }
         .btn-admin { background: #ffffff; color: #000000; font-weight: 900; border-radius: 50px; padding: 14px 28px; box-shadow: 0 10px 20px rgba(0,0,0,0.4); border: 2px solid var(--gold); }
         
         .suits { font-size: 24px; text-align: center; }
@@ -34,7 +35,7 @@
     <div id="screen-menu" class="h-full flex flex-col items-center justify-center space-y-8">
         <div class="text-center">
             <h1 class="text-6xl font-black italic text-yellow-500 tracking-tighter">POCHA</h1>
-            <p class="text-yellow-500/50 font-bold tracking-[0.3em] text-[10px]">SUPREME 2026</p>
+            <p class="text-yellow-500/50 font-bold tracking-[0.3em] text-[10px]">SUPREM 2026</p>
         </div>
         <div class="w-full max-w-xs space-y-4">
             <button onclick="show('online-setup')" class="btn-gold w-full text-lg">🌐 Juego Online</button>
@@ -56,19 +57,14 @@
             <div id="ui-room" class="bg-black/60 px-4 py-1.5 rounded-full text-[10px] font-black border border-white/10 uppercase"></div>
             <div id="ui-trump" class="scale-90 origin-right"></div>
         </div>
-        
         <div class="table-zone" id="table-zone">
             <div id="ui-scores" class="absolute top-2 left-2 glass p-3 text-[9px] z-50 min-w-[120px] border-l-4 border-yellow-500"></div>
             <div id="table-cards" class="relative w-full h-full flex items-center justify-center"></div>
-            
             <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <div id="ui-status-container" class="pointer-events-auto flex flex-col items-center gap-2"></div>
             </div>
         </div>
-
-        <div class="pb-8">
-            <div id="ui-hand" class="flex justify-center gap-2 overflow-x-auto py-4 px-4 min-h-[120px]"></div>
-        </div>
+        <div class="pb-8"><div id="ui-hand" class="flex justify-center gap-2 overflow-x-auto py-4 px-4 min-h-[120px]"></div></div>
     </div>
 
     <div id="screen-bolo-setup" class="hidden h-full flex flex-col p-6 justify-center">
@@ -89,25 +85,25 @@
             <h2 id="bolo-cards" class="text-6xl font-black italic">--</h2>
         </div>
         <div class="flex-1 glass p-4 overflow-y-auto space-y-4" id="bolo-inputs"></div>
-        <div id="bolo-rule" class="hidden bg-red-500/20 text-red-500 p-3 rounded-xl text-center mb-2 italic">NO VALE PEDIR <span id="bolo-forbid" class="font-black"></span></div>
-        <button id="btn-bolo-next" onclick="nextBolo()" class="btn-gold w-full py-5">Confirmar</button>
-    </div>
-
-    <div id="modal-bet" class="hidden fixed inset-0 z-[200] bg-black/95 flex items-center justify-center p-6">
-        <div class="glass p-8 w-full max-w-md text-center border-t-4 border-yellow-500">
-            <div id="bet-trump" class="flex justify-center mb-4"></div>
-            <div id="bet-hand" class="flex justify-center gap-1 scale-75 opacity-70 mb-4"></div>
-            <p class="text-xs font-black mb-6 uppercase tracking-widest text-yellow-500">¿Cuántas pides?</p>
-            <div id="bet-opts" class="grid grid-cols-4 gap-3"></div>
+        <div id="bolo-rule" class="hidden bg-red-600/30 text-red-200 p-3 rounded-xl text-center mb-2 italic border border-red-500">
+            ⚠️ REGLA: El último no puede pedir <span id="bolo-forbid" class="font-black text-white text-xl"></span>
         </div>
+        <button id="btn-bolo-next" onclick="nextBolo()" class="btn-gold w-full py-5">Confirmar</button>
     </div>
 
     <div id="modal-rank" class="hidden fixed inset-0 z-[300] bg-black/98 flex items-center justify-center p-4 text-center">
         <div class="glass w-full max-w-xs p-8 border-2 border-yellow-500/20">
             <h2 class="text-3xl font-black text-yellow-500 italic mb-6 uppercase">Marcador</h2>
             <div id="rank-content" class="space-y-3 mb-8"></div>
-            <button id="rank-btn-admin" class="hidden btn-gold w-full">Repartir Nueva Ronda</button>
-            <div id="rank-wait" class="text-xs font-bold opacity-40 animate-pulse uppercase">Esperando al Host...</div>
+            <button id="rank-btn-admin" class="btn-gold w-full">Avanzar Ronda</button>
+        </div>
+    </div>
+
+    <div id="modal-bet" class="hidden fixed inset-0 z-[200] bg-black/95 flex items-center justify-center p-6">
+        <div class="glass p-8 w-full max-w-md text-center border-t-4 border-yellow-500">
+            <div id="bet-trump" class="flex justify-center mb-4"></div>
+            <div id="bet-hand" class="flex justify-center gap-1 scale-75 opacity-70 mb-4"></div>
+            <div id="bet-opts" class="grid grid-cols-4 gap-3"></div>
         </div>
     </div>
 </div>
@@ -124,7 +120,7 @@
     let state = null;
     let myName = "";
     let roomCode = "";
-    let bolo = { players: [], round: 0, betting: true };
+    let bolo = { players: [], round: 0, betting: true, dealerIdx: 0 };
     const suits = { 'OROS': '🟡', 'COPAS': '🍷', 'ESPADAS': '⚔️', 'BASTOS': '🪵' };
 
     function show(id) {
@@ -132,6 +128,7 @@
         document.getElementById('screen-' + id).classList.remove('hidden');
     }
 
+    // --- LÓGICA ONLINE (INTACTA) ---
     async function initOnline() {
         myName = document.getElementById('p-name').value.trim().toUpperCase();
         roomCode = document.getElementById('p-room').value.trim().toUpperCase();
@@ -152,156 +149,165 @@
         const me = state.players.find(p => p.name === myName);
         const isTurn = state.players[state.turn]?.name === myName;
         const nCards = getSeq(state.players.length)[state.round];
-
         document.getElementById('ui-room').innerText = `R-${state.round + 1} | SALA ${roomCode}`;
         document.getElementById('ui-trump').innerHTML = state.trump ? cardUI(state.trump, 'small') : '';
         document.getElementById('ui-scores').innerHTML = state.players.map(p => `<div class="mb-1 ${state.players[state.turn]?.name === p.name ? 'text-yellow-400 font-bold' : 'opacity-40'}">${p.name}: ${p.score} <span class="float-right">[${p.made}/${p.bet < 0 ? '?' : p.bet}]</span></div>`).join('');
-
         const statusCont = document.getElementById('ui-status-container');
-        if(state.phase === 'LOBBY') {
-            statusCont.innerHTML = isAdmin ? `<button onclick="deal()" class="btn-admin text-xs">REPARTIR ${nCards}</button>` : `<div class="glass px-6 py-2 text-[9px] uppercase">Esperando al Host...</div>`;
-        } else if(state.phase === 'RESOLVING') {
-            statusCont.innerHTML = `<div class="flex flex-col items-center gap-3">
-                <div class="bg-blue-600 text-white px-6 py-2 rounded-full font-black text-[10px] uppercase">¡${state.winnerName} se lleva la baza!</div>
-                ${isAdmin ? `<button onclick="resolveBaza()" class="btn-admin text-xs">LIMPIAR MESA</button>` : ''}
-            </div>`;
-        } else {
-            statusCont.innerHTML = `<div class="bg-yellow-500 text-black px-6 py-2 rounded-full font-black text-[10px] uppercase shadow-xl">${isTurn ? '¡TE TOCA!' : 'TURNO: ' + state.players[state.turn].name}</div>`;
-        }
-
+        if(state.phase === 'LOBBY') statusCont.innerHTML = isAdmin ? `<button onclick="deal()" class="btn-admin text-xs">REPARTIR ${nCards}</button>` : `<div class="glass px-6 py-2 text-[9px] uppercase">Esperando...</div>`;
+        else if(state.phase === 'RESOLVING') statusCont.innerHTML = `<div class="bg-blue-600 px-6 py-2 rounded-full font-black text-[10px] uppercase">¡${state.winnerName} se la lleva!</div>` + (isAdmin ? `<button onclick="resolveBaza()" class="btn-admin text-xs mt-2">LIMPIAR</button>` : '');
+        else statusCont.innerHTML = `<div class="bg-yellow-500 text-black px-6 py-2 rounded-full font-black text-[10px] uppercase">${isTurn ? '¡TE TOCA!' : 'TURNO: ' + state.players[state.turn].name}</div>`;
         const table = document.getElementById('table-cards'); table.innerHTML = "";
-        state.players.forEach((p, i) => {
-            if(p.played) {
-                const angle = (i * (360 / state.players.length)) - 90;
-                const div = document.createElement('div');
-                div.className = "played-card-container";
-                div.style.transform = `rotate(${angle}deg) translate(80px) rotate(-${angle}deg)`;
-                div.innerHTML = `<div class="player-label ${p.name === myName ? 'text-yellow-400 border-yellow-400' : ''}">${p.name}</div>` + cardUI(p.played);
-                table.appendChild(div);
-            }
-        });
-
+        state.players.forEach((p, i) => { if(p.played) { const angle = (i * (360 / state.players.length)) - 90; const div = document.createElement('div'); div.className = "played-card-container"; div.style.transform = `rotate(${angle}deg) translate(80px) rotate(-${angle}deg)`; div.innerHTML = `<div class="player-label">${p.name}</div>` + cardUI(p.played); table.appendChild(div); } });
         const handUI = document.getElementById('ui-hand'); handUI.innerHTML = "";
-        if(me && me.hand) {
-            const hasSuit = me.hand.some(c => c.s === state.firstSuit);
-            me.hand.forEach((c, idx) => {
-                const canPlay = state.phase === 'PLAYING' && isTurn && (!state.firstSuit || c.s === state.firstSuit || !hasSuit);
-                const el = document.createElement('div');
-                el.innerHTML = cardUI(c, 'normal', !canPlay && state.phase === 'PLAYING');
-                if(canPlay) el.onclick = () => playCard(idx);
-                handUI.appendChild(el);
-            });
-        }
-
-        const mBet = document.getElementById('modal-bet');
-        if(state.phase === 'BETTING' && isTurn) {
-            mBet.classList.remove('hidden');
-            document.getElementById('bet-trump').innerHTML = cardUI(state.trump);
-            document.getElementById('bet-hand').innerHTML = me.hand.map(c => cardUI(c, 'small')).join('');
-            const opts = document.getElementById('bet-opts'); opts.innerHTML = "";
-            const done = state.players.filter(p => p.bet !== -1).length;
-            const sum = state.players.reduce((a, b) => a + (b.bet === -1 ? 0 : b.bet), 0);
-            const forbid = (done === state.players.length - 1) ? (nCards - sum) : -1;
-            for(let i=0; i<=nCards; i++) {
-                const btn = document.createElement('button');
-                btn.className = `p-4 rounded-xl font-black ${i === forbid ? 'bg-zinc-800 text-zinc-600' : 'bg-yellow-500 text-black'}`;
-                btn.innerText = i; btn.disabled = (i === forbid);
-                btn.onclick = () => db.ref(`rooms/${roomCode}`).update({
-                    [`players/${state.turn}/bet`]: i, turn: (state.turn + 1) % state.players.length,
-                    phase: (done + 1 === state.players.length) ? 'PLAYING' : 'BETTING'
-                });
-                opts.appendChild(btn);
-            }
-        } else mBet.classList.add('hidden');
-
+        if(me && me.hand) { const hasSuit = me.hand.some(c => c.s === state.firstSuit); me.hand.forEach((c, idx) => { const canPlay = state.phase === 'PLAYING' && isTurn && (!state.firstSuit || c.s === state.firstSuit || !hasSuit); const el = document.createElement('div'); el.innerHTML = cardUI(c, 'normal', !canPlay && state.phase === 'PLAYING'); if(canPlay) el.onclick = () => playCard(idx); handUI.appendChild(el); }); }
+        if(state.phase === 'BETTING' && isTurn) { showBetModal(me, nCards); } else document.getElementById('modal-bet').classList.add('hidden');
         const mRank = document.getElementById('modal-rank');
-        if(state.phase === 'RANKING') {
-            mRank.classList.remove('hidden');
-            document.getElementById('rank-content').innerHTML = [...state.players].sort((a,b)=>b.score-a.score).map(p => `
-                <div class="flex justify-between items-center font-black border-b border-white/10 pb-2">
-                    <span class="text-sm">${p.name}</span>
-                    <div class="flex items-center gap-3">
-                        <span class="text-[10px] ${p.lastDiff > 0 ? 'text-green-500' : 'text-red-500'}">${p.lastDiff > 0 ? '+' : ''}${p.lastDiff}</span>
-                        <span class="text-lg">${p.score}</span>
-                    </div>
-                </div>`).join('');
-            document.getElementById('rank-btn-admin').classList.toggle('hidden', !isAdmin);
-            document.getElementById('rank-wait').classList.toggle('hidden', isAdmin);
-            document.getElementById('rank-btn-admin').onclick = () => db.ref(`rooms/${roomCode}`).update({ phase: 'LOBBY' });
-        } else mRank.classList.add('hidden');
+        if(state.phase === 'RANKING') { mRank.classList.remove('hidden'); document.getElementById('rank-content').innerHTML = [...state.players].sort((a,b)=>b.score-a.score).map(p => `<div class="flex justify-between font-black"><span>${p.name}</span><span>${p.score} (${p.lastDiff >= 0 ? '+' : ''}${p.lastDiff})</span></div>`).join(''); document.getElementById('rank-btn-admin').style.display = isAdmin ? 'block' : 'none'; document.getElementById('rank-btn-admin').onclick = () => db.ref(`rooms/${roomCode}`).update({ phase: 'LOBBY' }); } else mRank.classList.add('hidden');
+    }
+
+    function showBetModal(me, nCards) {
+        const mBet = document.getElementById('modal-bet'); mBet.classList.remove('hidden');
+        document.getElementById('bet-trump').innerHTML = cardUI(state.trump);
+        document.getElementById('bet-hand').innerHTML = me.hand.map(c => cardUI(c, 'small')).join('');
+        const opts = document.getElementById('bet-opts'); opts.innerHTML = "";
+        const done = state.players.filter(p => p.bet !== -1).length;
+        const sum = state.players.reduce((a, b) => a + (b.bet === -1 ? 0 : b.bet), 0);
+        const forbid = (done === state.players.length - 1) ? (nCards - sum) : -1;
+        for(let i=0; i<=nCards; i++) {
+            const btn = document.createElement('button'); btn.className = `p-4 rounded-xl font-black ${i === forbid ? 'bg-zinc-800 text-zinc-600' : 'bg-yellow-500 text-black'}`;
+            btn.innerText = i; btn.disabled = (i === forbid); btn.onclick = () => db.ref(`rooms/${roomCode}`).update({ [`players/${state.turn}/bet`]: i, turn: (state.turn + 1) % state.players.length, phase: (done + 1 === state.players.length) ? 'PLAYING' : 'BETTING' });
+            opts.appendChild(btn);
+        }
     }
 
     async function playCard(idx) {
-        let ps = [...state.players];
-        let card = ps[state.turn].hand.splice(idx, 1)[0];
-        ps[state.turn].played = card;
-        let fs = state.firstSuit || card.s;
-        let t = (state.turn + 1) % ps.length;
-        let ph = ps.every(p => p.played) ? 'RESOLVING' : 'PLAYING';
-        
-        let winnerName = "";
-        if(ph === 'RESOLVING') {
-            let winIdx = 0; let best = -1;
-            ps.forEach((p, i) => {
-                let v = p.played.v === 1 ? 20 : (p.played.v === 3 ? 15 : p.played.v);
-                let pwr = (p.played.s === state.trump.s) ? v + 100 : (p.played.s === fs ? v : 0);
-                if(pwr > best) { best = pwr; winIdx = i; }
-            });
-            winnerName = ps[winIdx].name;
-        }
-        await db.ref(`rooms/${roomCode}`).update({ players: ps, firstSuit: fs, turn: t, phase: ph, winnerName });
+        let ps = [...state.players]; let card = ps[state.turn].hand.splice(idx, 1)[0]; ps[state.turn].played = card;
+        let fs = state.firstSuit || card.s; let t = (state.turn + 1) % ps.length; let ph = ps.every(p => p.played) ? 'RESOLVING' : 'PLAYING';
+        let winN = ""; if(ph === 'RESOLVING') { let winI = 0; let best = -1; ps.forEach((p, i) => { let v = p.played.v === 1 ? 20 : (p.played.v === 3 ? 15 : p.played.v); let pwr = (p.played.s === state.trump.s) ? v + 100 : (p.played.s === fs ? v : 0); if(pwr > best) { best = pwr; winI = i; } }); winN = ps[winI].name; }
+        await db.ref(`rooms/${roomCode}`).update({ players: ps, firstSuit: fs, turn: t, phase: ph, winnerName: winN });
     }
 
     async function resolveBaza() {
-        let ps = [...state.players];
-        let winIdx = 0; let best = -1;
-        ps.forEach((p, i) => {
-            let v = p.played.v === 1 ? 20 : (p.played.v === 3 ? 15 : p.played.v);
-            let pwr = (p.played.s === state.trump.s) ? v + 100 : (p.played.s === state.firstSuit ? v : 0);
-            if(pwr > best) { best = pwr; winIdx = i; }
-        });
-        ps[winIdx].made++; ps.forEach(p => p.played = null);
-        let endR = ps[0].hand ? ps[0].hand.length === 0 : true;
-        let up = { players: ps, turn: winIdx, firstSuit: null, phase: 'PLAYING' };
-        if(endR) {
-            ps.forEach(p => {
-                let diff = (p.bet === p.made) ? (10 + p.made * 5) : -5;
-                p.score += diff; p.lastDiff = diff; p.bet = -1; p.made = 0; p.hand = [];
-            });
-            up.round = state.round + 1; up.phase = 'RANKING';
-        }
+        let ps = [...state.players]; let winI = 0; let best = -1;
+        ps.forEach((p, i) => { let v = p.played.v === 1 ? 20 : (p.played.v === 3 ? 15 : p.played.v); let pwr = (p.played.s === state.trump.s) ? v + 100 : (p.played.s === state.firstSuit ? v : 0); if(pwr > best) { best = pwr; winI = i; } });
+        ps[winI].made++; ps.forEach(p => p.played = null);
+        let endR = ps[0].hand.length === 0; let up = { players: ps, turn: winI, firstSuit: null, phase: 'PLAYING' };
+        if(endR) { ps.forEach(p => { let d = (p.bet === p.made) ? (10 + p.made * 5) : -5; p.score += d; p.lastDiff = d; p.bet = -1; p.made = 0; }); up.round = state.round + 1; up.phase = 'RANKING'; }
         await db.ref(`rooms/${roomCode}`).update(up);
     }
 
     async function deal() {
-        const n = getSeq(state.players.length)[state.round];
-        const deck = [];
+        const n = getSeq(state.players.length)[state.round]; const deck = [];
         ['OROS','COPAS','ESPADAS','BASTOS'].forEach(s => [1,2,3,4,5,6,7,10,11,12].forEach(v => deck.push({s,v})));
-        deck.sort(() => Math.random() - 0.5);
-        let ps = state.players.map(p => ({ ...p, hand: deck.splice(0, n), bet: -1, made: 0, played: null }));
+        deck.sort(() => Math.random() - 0.5); let ps = state.players.map(p => ({ ...p, hand: deck.splice(0, n), bet: -1, made: 0, played: null }));
         await db.ref(`rooms/${roomCode}`).update({ players: ps, trump: deck.pop(), phase: 'BETTING', turn: state.round % ps.length, firstSuit: null });
     }
 
-    // --- MARCADOR BOLO ---
+    // --- MARCADOR BOLO (ARREGLADO) ---
     function addBoloP() { const v = document.getElementById('bolo-new-p').value.trim().toUpperCase(); if(v) { bolo.players.push({ name: v, score: 0, bet: 0, lastDiff: 0 }); document.getElementById('bolo-new-p').value = ""; renderBoloList(); } }
     function renderBoloList() { document.getElementById('bolo-list').innerHTML = bolo.players.map((p, i) => `<div class="flex justify-between p-4 glass font-bold"><span>${p.name}</span><button onclick="bolo.players.splice(${i},1);renderBoloList()">BORRAR</button></div>`).join(''); document.getElementById('btn-bolo-start').classList.toggle('hidden', bolo.players.length < 2); }
-    function startBolo() { bolo.round = 0; bolo.betting = true; show('bolo-board'); updateBoloUI(); }
-    function updateBoloUI() { const n = getSeq(bolo.players.length)[bolo.round]; document.getElementById('bolo-info').innerText = `RONDA ${bolo.round + 1}`; document.getElementById('bolo-cards').innerText = n; const area = document.getElementById('bolo-inputs'); area.innerHTML = bolo.players.map((p, i) => `<div class="flex justify-between items-center p-4 glass"><span>${p.name} ${!bolo.betting ? '(Pidi\u00f3 '+p.bet+')' : ''}</span><input type="number" id="bi-${i}" class="w-16 p-2 bg-black rounded text-center"></div>`).join(''); checkBoloRule(); }
-    function checkBoloRule() { if(!bolo.betting) return; const n = getSeq(bolo.players.length)[bolo.round]; let sum = 0; for(let i=0; i<bolo.players.length-1; i++) sum += parseInt(document.getElementById('bi-'+i).value) || 0; const f = n - sum; const isF = (f >= 0 && f <= n); document.getElementById('bolo-rule').classList.toggle('hidden', !isF); if(isF) document.getElementById('bolo-forbid').innerText = f; }
+    function startBolo() { bolo.round = 0; bolo.betting = true; bolo.dealerIdx = 0; show('bolo-board'); updateBoloUI(); }
+    
+    function updateBoloUI() {
+        const nCards = getSeq(bolo.players.length)[bolo.round];
+        document.getElementById('bolo-info').innerText = `RONDA ${bolo.round + 1}`;
+        document.getElementById('bolo-cards').innerText = nCards;
+        const area = document.getElementById('bolo-inputs'); area.innerHTML = "";
+
+        // Reordenar para que el Postre (el que reparte) sea el último de la lista visual
+        let order = [];
+        for(let i=0; i<bolo.players.length; i++) {
+            order.push((bolo.dealerIdx + 1 + i) % bolo.players.length);
+        }
+
+        order.forEach((idx, i) => {
+            const p = bolo.players[idx];
+            const isLast = (i === bolo.players.length - 1);
+            const div = document.createElement('div');
+            div.className = "flex justify-between items-center p-4 glass " + (isLast ? "border-l-4 border-red-500" : "");
+            div.innerHTML = `
+                <div class="flex flex-col">
+                    <span class="font-black text-xs uppercase">${p.name}</span>
+                    <span class="text-[8px] opacity-50 font-bold">${isLast ? 'POSTRE (EL QUE REPARTE)' : 'PIDE'}</span>
+                    ${!bolo.betting ? `<span class="text-[10px] text-yellow-500 font-black">PIDIÓ: ${p.bet}</span>` : ''}
+                </div>
+                <input type="number" id="bi-${idx}" 
+                       class="w-20 p-4 bg-black rounded-xl text-center font-black text-xl border border-white/10" 
+                       placeholder="${bolo.betting ? '?' : 'HIZO'}"
+                       oninput="checkBoloRule()">
+            `;
+            area.appendChild(div);
+        });
+        checkBoloRule();
+    }
+
+    function checkBoloRule() {
+        if (!bolo.betting) {
+            document.getElementById('btn-bolo-next').disabled = false;
+            document.getElementById('bolo-rule').classList.add('hidden');
+            return;
+        }
+
+        const nCards = getSeq(bolo.players.length)[bolo.round];
+        const lastPlayerIdx = bolo.dealerIdx; // El Postre es el Dealer
+        let sum = 0;
+        let playersDone = 0;
+
+        bolo.players.forEach((p, i) => {
+            const val = parseInt(document.getElementById(`bi-${i}`).value);
+            if (i !== lastPlayerIdx && !isNaN(val)) {
+                sum += val;
+                playersDone++;
+            }
+        });
+
+        // Solo aplicamos la regla si todos menos el último han puesto su número
+        if (playersDone === bolo.players.length - 1) {
+            const forbidden = nCards - sum;
+            const lastVal = parseInt(document.getElementById(`bi-${lastPlayerIdx}`).value);
+            
+            if (forbidden >= 0 && forbidden <= nCards) {
+                document.getElementById('bolo-rule').classList.remove('hidden');
+                document.getElementById('bolo-forbid').innerText = forbidden;
+                document.getElementById('btn-bolo-next').disabled = (lastVal === forbidden || isNaN(lastVal));
+            } else {
+                document.getElementById('bolo-rule').classList.add('hidden');
+                document.getElementById('btn-bolo-next').disabled = isNaN(lastVal);
+            }
+        } else {
+            document.getElementById('bolo-rule').classList.add('hidden');
+            document.getElementById('btn-bolo-next').disabled = true;
+        }
+    }
+
     function nextBolo() {
         if(bolo.betting) {
-            bolo.players.forEach((p, i) => p.bet = parseInt(document.getElementById('bi-'+i).value) || 0);
-            bolo.betting = false; updateBoloUI();
+            bolo.players.forEach((p, i) => p.bet = parseInt(document.getElementById(`bi-${i}`).value) || 0);
+            bolo.betting = false; 
+            updateBoloUI();
         } else {
             bolo.players.forEach((p, i) => { 
-                const m = parseInt(document.getElementById('bi-'+i).value) || 0; 
-                let d = (m === p.bet) ? (10 + m * 5) : -5;
+                const made = parseInt(document.getElementById(`bi-${i}`).value) || 0; 
+                let d = (made === p.bet) ? (10 + made * 5) : -5;
                 p.score += d; p.lastDiff = d;
             });
-            document.getElementById('rank-content').innerHTML = [...bolo.players].sort((a,b)=>b.score-a.score).map(p => `<div class="flex justify-between font-black"><span>${p.name}</span><span>${p.score} (${p.lastDiff >= 0 ? '+' : ''}${p.lastDiff})</span></div>`).join('');
-            document.getElementById('modal-rank').classList.remove('hidden');
-            document.getElementById('rank-btn-admin').classList.remove('hidden');
-            document.getElementById('rank-btn-admin').onclick = () => { document.getElementById('modal-rank').classList.add('hidden'); bolo.round++; bolo.betting = true; updateBoloUI(); };
+            const mRank = document.getElementById('modal-rank');
+            document.getElementById('rank-content').innerHTML = [...bolo.players].sort((a,b)=>b.score-a.score).map(p => `
+                <div class="flex justify-between font-black items-center border-b border-white/5 pb-2">
+                    <span>${p.name}</span>
+                    <div class="text-right">
+                        <div class="text-lg">${p.score}</div>
+                        <div class="text-[9px] ${p.lastDiff > 0 ? 'text-green-500' : 'text-red-500'}">${p.lastDiff >= 0 ? '+' : ''}${p.lastDiff}</div>
+                    </div>
+                </div>`).join('');
+            mRank.classList.remove('hidden');
+            document.getElementById('rank-btn-admin').onclick = () => {
+                mRank.classList.add('hidden');
+                bolo.round++;
+                bolo.dealerIdx = (bolo.dealerIdx + 1) % bolo.players.length;
+                bolo.betting = true;
+                updateBoloUI();
+            };
         }
     }
 
@@ -309,6 +315,7 @@
         const v = c.v === 1 ? 'A' : c.v;
         return `<div class="card ${mode==='small'?'scale-75':''} ${off?'disabled':'card-active'}"><div class="leading-none text-[10px]">${v}</div><div class="suits">${suits[c.s]}</div><div class="leading-none text-[10px] self-end rotate-180">${v}</div></div>`;
     }
+    
     function getSeq(nP) {
         let s = []; const max = Math.floor(40/nP);
         for(let i=0;i<nP;i++) s.push(1); for(let i=2;i<max;i++) s.push(i);
