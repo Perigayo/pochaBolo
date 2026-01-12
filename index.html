@@ -34,7 +34,7 @@
     <div id="screen-menu" class="h-full flex flex-col items-center justify-center space-y-8">
         <div class="text-center">
             <h1 class="text-6xl font-black italic text-yellow-500 tracking-tighter">POCHA</h1>
-            <p class="text-yellow-500/50 font-bold tracking-[0.3em] text-[10px]">BOLERA 2026</p>
+            <p class="text-yellow-500/50 font-bold tracking-[0.3em] text-[10px]">SUPREME 2026</p>
         </div>
         <div class="w-full max-w-xs space-y-4">
             <button onclick="show('online-setup')" class="btn-gold w-full text-lg">🌐 Juego Online</button>
@@ -283,127 +283,38 @@
     }
 
     // --- MARCADOR BOLO ---
-    // Añadimos dealerIdx al objeto bolo para controlar quién es el postre
-let bolo = { players: [], round: 0, betting: true, dealerIdx: 0 };
-
-function addBoloP() { 
-    const v = document.getElementById('bolo-new-p').value.trim().toUpperCase(); 
-    if(v) { 
-        bolo.players.push({ name: v, score: 0, bet: 0, lastDiff: 0 }); 
-        document.getElementById('bolo-new-p').value = ""; 
-        renderBoloList(); 
-    } 
-}
-
-function renderBoloList() { 
-    document.getElementById('bolo-list').innerHTML = bolo.players.map((p, i) => 
-        `<div class="flex justify-between p-4 glass font-bold"><span>${p.name}</span><button onclick="bolo.players.splice(${i},1);renderBoloList()">BORRAR</button></div>`
-    ).join(''); 
-    document.getElementById('btn-bolo-start').classList.toggle('hidden', bolo.players.length < 2); 
-}
-
-function startBolo() { 
-    bolo.round = 0; 
-    bolo.betting = true; 
-    bolo.dealerIdx = 0; // Empieza repartiendo el primero
-    show('bolo-board'); 
-    updateBoloUI(); 
-}
-
-function updateBoloUI() { 
-    const n = getSeq(bolo.players.length)[bolo.round]; 
-    document.getElementById('bolo-info').innerText = `RONDA ${bolo.round + 1}`; 
-    document.getElementById('bolo-cards').innerText = n; 
-    const area = document.getElementById('bolo-inputs'); 
-    
-    // Generamos los inputs. Marcamos visualmente quién es el POSTRE en esta ronda.
-    area.innerHTML = bolo.players.map((p, i) => {
-        const isPostre = (i === bolo.dealerIdx);
-        return `
-        <div class="flex justify-between items-center p-4 glass ${isPostre ? 'border-l-4 border-red-500' : ''}">
-            <span>
-                ${p.name} ${isPostre ? '<strong>(POSTRE)</strong>' : ''} 
-                ${!bolo.betting ? '<br><small>Pidi\u00f3: '+p.bet+'</small>' : ''}
-            </span>
-            <input type="number" id="bi-${i}" class="w-16 p-2 bg-black rounded text-center font-bold" oninput="checkBoloRule()">
-        </div>`;
-    }).join(''); 
-    checkBoloRule(); 
-}
-
-function checkBoloRule() { 
-    if(!bolo.betting) {
-        document.getElementById('btn-bolo-next').disabled = false;
-        return;
-    }
-    
-    const n = getSeq(bolo.players.length)[bolo.round]; 
-    let sum = 0; 
-    let filledCount = 0;
-
-    // Calculamos la suma de todos EXCEPTO la del postre
-    bolo.players.forEach((p, i) => {
-        const val = parseInt(document.getElementById('bi-'+i).value);
-        if (i !== bolo.dealerIdx && !isNaN(val)) {
-            sum += val;
-            filledCount++;
-        }
-    });
-
-    const forbidden = n - sum;
-    const postreInput = document.getElementById('bi-' + bolo.dealerIdx);
-    const postreVal = parseInt(postreInput.value);
-
-    // Si todos los demás ya han puesto su apuesta, calculamos el "No Vale"
-    if (filledCount === bolo.players.length - 1) {
-        const isForbiddenPossible = (forbidden >= 0 && forbidden <= n);
-        
-        if (isForbiddenPossible) {
-            document.getElementById('bolo-rule').classList.remove('hidden');
-            document.getElementById('bolo-forbid').innerText = forbidden;
-            // Bloqueamos el botón si el postre elige el prohibido
-            document.getElementById('btn-bolo-next').disabled = (postreVal === forbidden || isNaN(postreVal));
+    function addBoloP() { const v = document.getElementById('bolo-new-p').value.trim().toUpperCase(); if(v) { bolo.players.push({ name: v, score: 0, bet: 0, lastDiff: 0 }); document.getElementById('bolo-new-p').value = ""; renderBoloList(); } }
+    function renderBoloList() { document.getElementById('bolo-list').innerHTML = bolo.players.map((p, i) => `<div class="flex justify-between p-4 glass font-bold"><span>${p.name}</span><button onclick="bolo.players.splice(${i},1);renderBoloList()">BORRAR</button></div>`).join(''); document.getElementById('btn-bolo-start').classList.toggle('hidden', bolo.players.length < 2); }
+    function startBolo() { bolo.round = 0; bolo.betting = true; show('bolo-board'); updateBoloUI(); }
+    function updateBoloUI() { const n = getSeq(bolo.players.length)[bolo.round]; document.getElementById('bolo-info').innerText = `RONDA ${bolo.round + 1}`; document.getElementById('bolo-cards').innerText = n; const area = document.getElementById('bolo-inputs'); area.innerHTML = bolo.players.map((p, i) => `<div class="flex justify-between items-center p-4 glass"><span>${p.name} ${!bolo.betting ? '(Pidi\u00f3 '+p.bet+')' : ''}</span><input type="number" id="bi-${i}" class="w-16 p-2 bg-black rounded text-center"></div>`).join(''); checkBoloRule(); }
+    function checkBoloRule() { if(!bolo.betting) return; const n = getSeq(bolo.players.length)[bolo.round]; let sum = 0; for(let i=0; i<bolo.players.length-1; i++) sum += parseInt(document.getElementById('bi-'+i).value) || 0; const f = n - sum; const isF = (f >= 0 && f <= n); document.getElementById('bolo-rule').classList.toggle('hidden', !isF); if(isF) document.getElementById('bolo-forbid').innerText = f; }
+    function nextBolo() {
+        if(bolo.betting) {
+            bolo.players.forEach((p, i) => p.bet = parseInt(document.getElementById('bi-'+i).value) || 0);
+            bolo.betting = false; updateBoloUI();
         } else {
-            document.getElementById('bolo-rule').classList.add('hidden');
-            document.getElementById('btn-bolo-next').disabled = isNaN(postreVal);
+            bolo.players.forEach((p, i) => { 
+                const m = parseInt(document.getElementById('bi-'+i).value) || 0; 
+                let d = (m === p.bet) ? (10 + m * 5) : -5;
+                p.score += d; p.lastDiff = d;
+            });
+            document.getElementById('rank-content').innerHTML = [...bolo.players].sort((a,b)=>b.score-a.score).map(p => `<div class="flex justify-between font-black"><span>${p.name}</span><span>${p.score} (${p.lastDiff >= 0 ? '+' : ''}${p.lastDiff})</span></div>`).join('');
+            document.getElementById('modal-rank').classList.remove('hidden');
+            document.getElementById('rank-btn-admin').classList.remove('hidden');
+            document.getElementById('rank-btn-admin').onclick = () => { document.getElementById('modal-rank').classList.add('hidden'); bolo.round++; bolo.betting = true; updateBoloUI(); };
         }
-    } else {
-        // Bloqueamos el botón hasta que todos rellenen
-        document.getElementById('btn-bolo-next').disabled = true;
     }
-}
 
-function nextBolo() {
-    if(bolo.betting) {
-        bolo.players.forEach((p, i) => p.bet = parseInt(document.getElementById('bi-'+i).value) || 0);
-        bolo.betting = false; 
-        updateBoloUI();
-    } else {
-        bolo.players.forEach((p, i) => { 
-            const m = parseInt(document.getElementById('bi-'+i).value) || 0; 
-            let d = (m === p.bet) ? (10 + m * 5) : -5;
-            p.score += d; p.lastDiff = d;
-        });
-        
-        document.getElementById('rank-content').innerHTML = [...bolo.players].sort((a,b)=>b.score-a.score).map(p => `
-            <div class="flex justify-between font-black">
-                <span>${p.name}</span>
-                <span>${p.score} (${p.lastDiff >= 0 ? '+' : ''}${p.lastDiff})</span>
-            </div>`).join('');
-            
-        document.getElementById('modal-rank').classList.remove('hidden');
-        document.getElementById('rank-btn-admin').classList.remove('hidden');
-        
-        document.getElementById('rank-btn-admin').onclick = () => { 
-            document.getElementById('modal-rank').classList.add('hidden'); 
-            bolo.round++; 
-            bolo.betting = true; 
-            // Rotamos el postre para la siguiente ronda
-            bolo.dealerIdx = (bolo.dealerIdx + 1) % bolo.players.length;
-            updateBoloUI(); 
-        };
+    function cardUI(c, mode='normal', off=false) {
+        const v = c.v === 1 ? 'A' : c.v;
+        return `<div class="card ${mode==='small'?'scale-75':''} ${off?'disabled':'card-active'}"><div class="leading-none text-[10px]">${v}</div><div class="suits">${suits[c.s]}</div><div class="leading-none text-[10px] self-end rotate-180">${v}</div></div>`;
     }
-}
+    function getSeq(nP) {
+        let s = []; const max = Math.floor(40/nP);
+        for(let i=0;i<nP;i++) s.push(1); for(let i=2;i<max;i++) s.push(i);
+        for(let i=0;i<nP;i++) s.push(max); for(let i=max-1;i>=2;i--) s.push(i);
+        for(let i=0;i<nP;i++) s.push(1); return s;
+    }
 </script>
 </body>
 </html>
