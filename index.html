@@ -9,71 +9,77 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root { --bg: #064e3b; --gold: #fbbf24; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: sans-serif; }
-        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: var(--bg); color: white; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: sans-serif; margin: 0; padding: 0; }
+        body, html { height: 100%; overflow: hidden; background: var(--bg); color: white; font-family: system-ui, -apple-system, sans-serif; }
         .safe-area { padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom); height: 100%; display: flex; flex-direction: column; }
         .glass { background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); border-radius: 24px; border: 1px solid rgba(255,255,255,0.1); }
         
-        .card { width: 52px; height: 78px; background: white; border-radius: 8px; color: black; display: flex; flex-direction: column; justify-content: space-between; padding: 5px; font-weight: 900; box-shadow: 0 4px 10px rgba(0,0,0,0.4); }
+        .card { width: 52px; height: 78px; background: white; border-radius: 8px; color: black; display: flex; flex-direction: column; justify-content: space-between; padding: 5px; font-weight: 900; box-shadow: 0 4px 10px rgba(0,0,0,0.4); border: 1px solid #ddd; }
         .card-active:active { transform: translateY(-15px) scale(1.1); border: 2px solid var(--gold); }
         .card.disabled { opacity: 0.3; filter: grayscale(1); pointer-events: none; }
         
-        .table-zone { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; }
-        .played-card { position: absolute; width: 52px; height: 78px; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .table-zone { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; width: 100%; }
+        .played-card-container { position: absolute; display: flex; flex-direction: column; align-items: center; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .player-label { background: rgba(0,0,0,0.7); padding: 2px 8px; border-radius: 10px; font-size: 9px; font-weight: 900; text-transform: uppercase; margin-bottom: 4px; border: 1px solid rgba(255,255,255,0.2); white-space: nowrap; }
+
+        .btn-gold { background: var(--gold); color: black; font-weight: 900; border-radius: 18px; padding: 18px; text-transform: uppercase; }
+        .btn-admin { background: #ffffff; color: #000000; font-weight: 900; border-radius: 50px; padding: 14px 28px; box-shadow: 0 10px 20px rgba(0,0,0,0.4); border: 2px solid var(--gold); }
         
-        .btn-gold { background: var(--gold); color: black; font-weight: 900; border-radius: 18px; padding: 18px; transition: all 0.1s; text-transform: uppercase; }
-        .btn-admin { background: #ffffff; color: #000000; font-weight: 900; border-radius: 50px; padding: 12px 24px; box-shadow: 0 10px 20px rgba(0,0,0,0.5); border: 2px solid var(--gold); animation: pulse-border 2s infinite; }
-        @keyframes pulse-border { 0% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(251, 191, 36, 0); } 100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0); } }
+        .suits { font-size: 24px; text-align: center; }
     </style>
 </head>
 <body>
 
 <div class="safe-area">
-    <div id="screen-menu" class="h-full flex flex-col items-center justify-center space-y-10">
+    <div id="screen-menu" class="h-full flex flex-col items-center justify-center space-y-8">
         <div class="text-center">
             <h1 class="text-6xl font-black italic text-yellow-500 tracking-tighter">POCHA</h1>
-            <p class="text-yellow-500/50 font-bold tracking-[0.3em] text-[10px]">bolito 2026</p>
+            <p class="text-yellow-500/50 font-bold tracking-[0.3em] text-[10px]">SUPREME 2026</p>
         </div>
         <div class="w-full max-w-xs space-y-4">
-            <button onclick="show('online-setup')" class="btn-gold w-full text-lg shadow-lg">🌐 Juego Online</button>
+            <button onclick="show('online-setup')" class="btn-gold w-full text-lg">🌐 Juego Online</button>
             <button onclick="show('bolo-setup')" class="w-full py-4 glass font-bold text-zinc-400">📝 Marcador Bolo</button>
         </div>
     </div>
 
     <div id="screen-online-setup" class="hidden h-full flex flex-col justify-center p-4">
         <div class="glass p-8 space-y-6">
-            <input type="text" id="p-name" placeholder="TU APODO" class="w-full p-4 rounded-2xl bg-black/40 border border-white/10 uppercase font-bold text-center outline-none">
+            <input type="text" id="p-name" placeholder="TU NOMBRE" class="w-full p-4 rounded-2xl bg-black/40 border border-white/10 uppercase font-bold text-center outline-none">
             <input type="text" id="p-room" placeholder="CÓDIGO MESA" class="w-full p-4 rounded-2xl bg-black/40 border border-white/10 uppercase font-bold text-center text-yellow-500 outline-none">
-            <button onclick="initOnline()" class="btn-gold w-full">Entrar a Jugar</button>
-            <button onclick="show('menu')" class="w-full text-xs opacity-40 font-bold py-2 uppercase">Cancelar</button>
+            <button onclick="initOnline()" class="btn-gold w-full">Entrar</button>
+            <button onclick="show('menu')" class="w-full text-xs opacity-40 font-bold">Volver</button>
         </div>
     </div>
 
     <div id="screen-game" class="hidden h-full flex flex-col">
         <div class="flex justify-between items-center py-3 px-2 z-50">
-            <div id="ui-room" class="bg-black/60 px-4 py-1.5 rounded-full text-[10px] font-black border border-white/10 uppercase">SALA: -</div>
+            <div id="ui-room" class="bg-black/60 px-4 py-1.5 rounded-full text-[10px] font-black border border-white/10 uppercase"></div>
             <div id="ui-trump" class="scale-90 origin-right"></div>
         </div>
-        <div class="table-zone">
-            <div id="ui-scores" class="absolute top-2 left-2 glass p-4 text-[10px] z-50 min-w-[130px] border-l-4 border-yellow-500"></div>
-            <div id="table-cards" class="relative w-full h-full"></div>
+        
+        <div class="table-zone" id="table-zone">
+            <div id="ui-scores" class="absolute top-2 left-2 glass p-3 text-[9px] z-50 min-w-[120px] border-l-4 border-yellow-500"></div>
+            <div id="table-cards" class="relative w-full h-full flex items-center justify-center"></div>
+            
             <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div id="ui-status-container" class="pointer-events-auto flex flex-col items-center gap-4"></div>
+                <div id="ui-status-container" class="pointer-events-auto flex flex-col items-center gap-2"></div>
             </div>
         </div>
-        <div class="pb-10"><div id="ui-hand" class="flex justify-center gap-2 overflow-x-auto py-6 px-4 min-h-[140px]"></div></div>
+
+        <div class="pb-8">
+            <div id="ui-hand" class="flex justify-center gap-2 overflow-x-auto py-4 px-4 min-h-[120px]"></div>
+        </div>
     </div>
 
     <div id="screen-bolo-setup" class="hidden h-full flex flex-col p-6 justify-center">
         <div class="glass p-6 space-y-4">
-            <h2 class="text-xl font-black text-center text-yellow-500 uppercase italic">Marcador Bolo</h2>
+            <h2 class="text-xl font-black text-center text-yellow-500 uppercase italic">Jugadores Bolo</h2>
             <div class="flex gap-2">
-                <input type="text" id="bolo-new-p" placeholder="NOMBRE" class="flex-1 p-4 bg-black/40 rounded-xl border border-white/10 font-bold uppercase outline-none">
+                <input type="text" id="bolo-new-p" class="flex-1 p-4 bg-black/40 rounded-xl border border-white/10 font-bold uppercase outline-none">
                 <button onclick="addBoloP()" class="bg-yellow-600 px-6 rounded-xl font-black text-2xl">+</button>
             </div>
             <div id="bolo-list" class="space-y-2 max-h-48 overflow-y-auto"></div>
-            <button id="btn-bolo-start" onclick="startBolo()" class="hidden btn-gold w-full">Iniciar Partida</button>
-            <button onclick="show('menu')" class="w-full text-xs opacity-40 font-bold py-2 uppercase">Volver</button>
+            <button id="btn-bolo-start" onclick="startBolo()" class="hidden btn-gold w-full">Empezar</button>
         </div>
     </div>
 
@@ -83,30 +89,25 @@
             <h2 id="bolo-cards" class="text-6xl font-black italic">--</h2>
         </div>
         <div class="flex-1 glass p-4 overflow-y-auto space-y-4" id="bolo-inputs"></div>
-        <div id="bolo-rule" class="hidden bg-red-500/20 text-red-500 p-3 rounded-xl text-center mb-2 italic tracking-tighter">⚠️ NO PUEDES PEDIR <span id="bolo-forbid" class="font-black text-lg"></span></div>
-        <button id="btn-bolo-next" onclick="nextBolo()" class="btn-gold w-full py-5 text-xl">Confirmar</button>
+        <div id="bolo-rule" class="hidden bg-red-500/20 text-red-500 p-3 rounded-xl text-center mb-2 italic">NO VALE PEDIR <span id="bolo-forbid" class="font-black"></span></div>
+        <button id="btn-bolo-next" onclick="nextBolo()" class="btn-gold w-full py-5">Confirmar</button>
     </div>
 
     <div id="modal-bet" class="hidden fixed inset-0 z-[200] bg-black/95 flex items-center justify-center p-6">
         <div class="glass p-8 w-full max-w-md text-center border-t-4 border-yellow-500">
-            <div class="flex flex-col items-center gap-4 mb-6">
-                <div class="flex items-center gap-3 bg-white/5 p-3 rounded-2xl border border-white/5">
-                    <span class="text-[10px] font-black text-yellow-500 uppercase tracking-widest">PINTA:</span>
-                    <div id="bet-trump"></div>
-                </div>
-                <div id="bet-hand" class="flex justify-center gap-1 scale-90 opacity-80"></div>
-            </div>
-            <p class="text-xs font-black mb-6 uppercase">¿Cuántas bazas vas a ganar?</p>
+            <div id="bet-trump" class="flex justify-center mb-4"></div>
+            <div id="bet-hand" class="flex justify-center gap-1 scale-75 opacity-70 mb-4"></div>
+            <p class="text-xs font-black mb-6 uppercase tracking-widest text-yellow-500">¿Cuántas pides?</p>
             <div id="bet-opts" class="grid grid-cols-4 gap-3"></div>
         </div>
     </div>
 
-    <div id="modal-rank" class="hidden fixed inset-0 z-[300] bg-black/98 flex items-center justify-center p-4">
-        <div class="glass w-full max-w-xs p-10 text-center border-2 border-yellow-500/20">
-            <h2 class="text-3xl font-black text-yellow-500 italic mb-8 uppercase">Ranking</h2>
-            <div id="rank-content" class="space-y-4 mb-10 text-lg"></div>
-            <button id="rank-btn-admin" class="hidden btn-gold w-full">Siguiente Ronda</button>
-            <div id="rank-wait" class="text-xs font-bold opacity-50 uppercase animate-pulse">Esperando al administrador...</div>
+    <div id="modal-rank" class="hidden fixed inset-0 z-[300] bg-black/98 flex items-center justify-center p-4 text-center">
+        <div class="glass w-full max-w-xs p-8 border-2 border-yellow-500/20">
+            <h2 class="text-3xl font-black text-yellow-500 italic mb-6 uppercase">Marcador</h2>
+            <div id="rank-content" class="space-y-3 mb-8"></div>
+            <button id="rank-btn-admin" class="hidden btn-gold w-full">Repartir Nueva Ronda</button>
+            <div id="rank-wait" class="text-xs font-bold opacity-40 animate-pulse uppercase">Esperando al Host...</div>
         </div>
     </div>
 </div>
@@ -128,11 +129,9 @@
 
     function show(id) {
         document.querySelectorAll('.safe-area > div').forEach(d => d.classList.add('hidden'));
-        const el = document.getElementById('screen-' + id);
-        if(el) el.classList.remove('hidden');
+        document.getElementById('screen-' + id).classList.remove('hidden');
     }
 
-    // --- LÓGICA ONLINE ---
     async function initOnline() {
         myName = document.getElementById('p-name').value.trim().toUpperCase();
         roomCode = document.getElementById('p-room').value.trim().toUpperCase();
@@ -141,7 +140,7 @@
         const snap = await ref.get();
         let data = snap.val() || { players: [], phase: 'LOBBY', round: 0, turn: 0 };
         if(!data.players.find(p => p.name === myName)) {
-            data.players.push({ name: myName, score: 0, bet: -1, made: 0, hand: [], played: null });
+            data.players.push({ name: myName, score: 0, lastDiff: 0, bet: -1, made: 0, hand: [], played: null });
             await ref.set(data);
         }
         ref.on('value', s => { state = s.val(); if(state) renderOnline(); });
@@ -149,33 +148,35 @@
     }
 
     function renderOnline() {
+        const isAdmin = state.players[0].name === myName;
         const me = state.players.find(p => p.name === myName);
         const isTurn = state.players[state.turn]?.name === myName;
-        const isAdmin = state.players[0].name === myName;
         const nCards = getSeq(state.players.length)[state.round];
 
-        document.getElementById('ui-room').innerText = `SALA: ${roomCode} | RONDA ${state.round + 1}`;
+        document.getElementById('ui-room').innerText = `R-${state.round + 1} | SALA ${roomCode}`;
         document.getElementById('ui-trump').innerHTML = state.trump ? cardUI(state.trump, 'small') : '';
         document.getElementById('ui-scores').innerHTML = state.players.map(p => `<div class="mb-1 ${state.players[state.turn]?.name === p.name ? 'text-yellow-400 font-bold' : 'opacity-40'}">${p.name}: ${p.score} <span class="float-right">[${p.made}/${p.bet < 0 ? '?' : p.bet}]</span></div>`).join('');
 
         const statusCont = document.getElementById('ui-status-container');
         if(state.phase === 'LOBBY') {
-            statusCont.innerHTML = isAdmin ? `<button onclick="deal()" class="btn-admin">REPARTIR ${nCards} CARTAS</button>` : `<div class="bg-zinc-800 px-8 py-3 rounded-full text-[10px] font-black uppercase">Esperando administrador...</div>`;
+            statusCont.innerHTML = isAdmin ? `<button onclick="deal()" class="btn-admin text-xs">REPARTIR ${nCards}</button>` : `<div class="glass px-6 py-2 text-[9px] uppercase">Esperando al Host...</div>`;
         } else if(state.phase === 'RESOLVING') {
-            statusCont.innerHTML = isAdmin ? `<button onclick="resolveBaza()" class="btn-admin">SIGUIENTE BAZA</button>` : `<div class="bg-zinc-800 px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-widest">Baza terminada...</div>`;
+            statusCont.innerHTML = `<div class="flex flex-col items-center gap-3">
+                <div class="bg-blue-600 text-white px-6 py-2 rounded-full font-black text-[10px] uppercase">¡${state.winnerName} se lleva la baza!</div>
+                ${isAdmin ? `<button onclick="resolveBaza()" class="btn-admin text-xs">LIMPIAR MESA</button>` : ''}
+            </div>`;
         } else {
-            statusCont.innerHTML = `<div class="bg-yellow-500 text-black px-6 py-2 rounded-full font-black text-[10px] uppercase shadow-2xl">${isTurn ? '¡TU TURNO!' : 'TURNO DE ' + state.players[state.turn].name}</div>`;
+            statusCont.innerHTML = `<div class="bg-yellow-500 text-black px-6 py-2 rounded-full font-black text-[10px] uppercase shadow-xl">${isTurn ? '¡TE TOCA!' : 'TURNO: ' + state.players[state.turn].name}</div>`;
         }
 
         const table = document.getElementById('table-cards'); table.innerHTML = "";
         state.players.forEach((p, i) => {
             if(p.played) {
-                const angle = i * (360 / state.players.length);
+                const angle = (i * (360 / state.players.length)) - 90;
                 const div = document.createElement('div');
-                div.className = "played-card";
-                div.style.left = "50%"; div.style.top = "50%";
-                div.style.transform = `translate(-50%, -50%) rotate(${angle}deg) translateY(-70px) rotate(-${angle}deg)`;
-                div.innerHTML = cardUI(p.played);
+                div.className = "played-card-container";
+                div.style.transform = `rotate(${angle}deg) translate(80px) rotate(-${angle}deg)`;
+                div.innerHTML = `<div class="player-label ${p.name === myName ? 'text-yellow-400 border-yellow-400' : ''}">${p.name}</div>` + cardUI(p.played);
                 table.appendChild(div);
             }
         });
@@ -195,7 +196,7 @@
         const mBet = document.getElementById('modal-bet');
         if(state.phase === 'BETTING' && isTurn) {
             mBet.classList.remove('hidden');
-            document.getElementById('bet-trump').innerHTML = cardUI(state.trump, 'small');
+            document.getElementById('bet-trump').innerHTML = cardUI(state.trump);
             document.getElementById('bet-hand').innerHTML = me.hand.map(c => cardUI(c, 'small')).join('');
             const opts = document.getElementById('bet-opts'); opts.innerHTML = "";
             const done = state.players.filter(p => p.bet !== -1).length;
@@ -203,7 +204,7 @@
             const forbid = (done === state.players.length - 1) ? (nCards - sum) : -1;
             for(let i=0; i<=nCards; i++) {
                 const btn = document.createElement('button');
-                btn.className = `p-4 rounded-2xl font-black ${i === forbid ? 'bg-zinc-800 text-zinc-600' : 'bg-yellow-500 text-black shadow-lg'}`;
+                btn.className = `p-4 rounded-xl font-black ${i === forbid ? 'bg-zinc-800 text-zinc-600' : 'bg-yellow-500 text-black'}`;
                 btn.innerText = i; btn.disabled = (i === forbid);
                 btn.onclick = () => db.ref(`rooms/${roomCode}`).update({
                     [`players/${state.turn}/bet`]: i, turn: (state.turn + 1) % state.players.length,
@@ -216,7 +217,14 @@
         const mRank = document.getElementById('modal-rank');
         if(state.phase === 'RANKING') {
             mRank.classList.remove('hidden');
-            document.getElementById('rank-content').innerHTML = [...state.players].sort((a,b)=>b.score-a.score).map(p => `<div class="flex justify-between font-black border-b border-white/10 pb-2"><span>${p.name}</span><span>${p.score}</span></div>`).join('');
+            document.getElementById('rank-content').innerHTML = [...state.players].sort((a,b)=>b.score-a.score).map(p => `
+                <div class="flex justify-between items-center font-black border-b border-white/10 pb-2">
+                    <span class="text-sm">${p.name}</span>
+                    <div class="flex items-center gap-3">
+                        <span class="text-[10px] ${p.lastDiff > 0 ? 'text-green-500' : 'text-red-500'}">${p.lastDiff > 0 ? '+' : ''}${p.lastDiff}</span>
+                        <span class="text-lg">${p.score}</span>
+                    </div>
+                </div>`).join('');
             document.getElementById('rank-btn-admin').classList.toggle('hidden', !isAdmin);
             document.getElementById('rank-wait').classList.toggle('hidden', isAdmin);
             document.getElementById('rank-btn-admin').onclick = () => db.ref(`rooms/${roomCode}`).update({ phase: 'LOBBY' });
@@ -230,22 +238,36 @@
         let fs = state.firstSuit || card.s;
         let t = (state.turn + 1) % ps.length;
         let ph = ps.every(p => p.played) ? 'RESOLVING' : 'PLAYING';
-        await db.ref(`rooms/${roomCode}`).update({ players: ps, firstSuit: fs, turn: t, phase: ph });
+        
+        let winnerName = "";
+        if(ph === 'RESOLVING') {
+            let winIdx = 0; let best = -1;
+            ps.forEach((p, i) => {
+                let v = p.played.v === 1 ? 20 : (p.played.v === 3 ? 15 : p.played.v);
+                let pwr = (p.played.s === state.trump.s) ? v + 100 : (p.played.s === fs ? v : 0);
+                if(pwr > best) { best = pwr; winIdx = i; }
+            });
+            winnerName = ps[winIdx].name;
+        }
+        await db.ref(`rooms/${roomCode}`).update({ players: ps, firstSuit: fs, turn: t, phase: ph, winnerName });
     }
 
     async function resolveBaza() {
         let ps = [...state.players];
-        let winner = 0; let best = -1;
+        let winIdx = 0; let best = -1;
         ps.forEach((p, i) => {
             let v = p.played.v === 1 ? 20 : (p.played.v === 3 ? 15 : p.played.v);
             let pwr = (p.played.s === state.trump.s) ? v + 100 : (p.played.s === state.firstSuit ? v : 0);
-            if(pwr > best) { best = pwr; winner = i; }
+            if(pwr > best) { best = pwr; winIdx = i; }
         });
-        ps[winner].made++; ps.forEach(p => p.played = null);
-        let endRound = ps[0].hand ? ps[0].hand.length === 0 : true;
-        let up = { players: ps, turn: winner, firstSuit: null, phase: 'PLAYING' };
-        if(endRound) {
-            ps.forEach(p => { p.score += (p.bet === p.made) ? (10 + p.made * 5) : -5; p.bet = -1; p.made = 0; p.hand = []; });
+        ps[winIdx].made++; ps.forEach(p => p.played = null);
+        let endR = ps[0].hand ? ps[0].hand.length === 0 : true;
+        let up = { players: ps, turn: winIdx, firstSuit: null, phase: 'PLAYING' };
+        if(endR) {
+            ps.forEach(p => {
+                let diff = (p.bet === p.made) ? (10 + p.made * 5) : -5;
+                p.score += diff; p.lastDiff = diff; p.bet = -1; p.made = 0; p.hand = [];
+            });
             up.round = state.round + 1; up.phase = 'RANKING';
         }
         await db.ref(`rooms/${roomCode}`).update(up);
@@ -261,25 +283,37 @@
     }
 
     // --- MARCADOR BOLO ---
-    function addBoloP() { const v = document.getElementById('bolo-new-p').value.trim().toUpperCase(); if(v) { bolo.players.push({ name: v, score: 0, bet: 0 }); document.getElementById('bolo-new-p').value = ""; renderBoloList(); } }
-    function renderBoloList() { document.getElementById('bolo-list').innerHTML = bolo.players.map((p, i) => `<div class="flex justify-between p-4 glass font-bold"><span>👤 ${p.name}</span><button onclick="bolo.players.splice(${i},1);renderBoloList()" class="text-red-500 font-black">X</button></div>`).join(''); document.getElementById('btn-bolo-start').classList.toggle('hidden', bolo.players.length < 2); }
+    function addBoloP() { const v = document.getElementById('bolo-new-p').value.trim().toUpperCase(); if(v) { bolo.players.push({ name: v, score: 0, bet: 0, lastDiff: 0 }); document.getElementById('bolo-new-p').value = ""; renderBoloList(); } }
+    function renderBoloList() { document.getElementById('bolo-list').innerHTML = bolo.players.map((p, i) => `<div class="flex justify-between p-4 glass font-bold"><span>${p.name}</span><button onclick="bolo.players.splice(${i},1);renderBoloList()">BORRAR</button></div>`).join(''); document.getElementById('btn-bolo-start').classList.toggle('hidden', bolo.players.length < 2); }
     function startBolo() { bolo.round = 0; bolo.betting = true; show('bolo-board'); updateBoloUI(); }
-    function updateBoloUI() { const n = getSeq(bolo.players.length)[bolo.round]; document.getElementById('bolo-info').innerText = `RONDA ${bolo.round + 1}`; document.getElementById('bolo-cards').innerText = n; const area = document.getElementById('bolo-inputs'); area.innerHTML = bolo.players.map((p, i) => `<div class="flex justify-between items-center p-4 glass"><span>${p.name}</span><input type="number" id="bi-${i}" class="w-20 p-3 bg-black rounded-xl text-center font-black" oninput="checkBoloRule()"></div>`).join(''); checkBoloRule(); }
-    function checkBoloRule() { if(!bolo.betting) return; const n = getSeq(bolo.players.length)[bolo.round]; let sum = 0; for(let i=0; i<bolo.players.length-1; i++) sum += parseInt(document.getElementById('bi-'+i).value) || 0; const f = n - sum; const isF = (f >= 0 && f <= n); document.getElementById('bolo-rule').classList.toggle('hidden', !isF); if(isF) document.getElementById('bolo-forbid').innerText = f; document.getElementById('btn-bolo-next').disabled = (isF && parseInt(document.getElementById('bi-'+(bolo.players.length-1)).value) === f); }
-    function nextBolo() { if(bolo.betting) { bolo.players.forEach((p, i) => p.bet = parseInt(document.getElementById('bi-'+i).value) || 0); bolo.betting = false; updateBoloUI(); } else { bolo.players.forEach((p, i) => { const m = parseInt(document.getElementById('bi-'+i).value) || 0; p.score += (m === p.bet) ? (10 + m * 5) : -5; }); document.getElementById('rank-content').innerHTML = [...bolo.players].sort((a,b)=>b.score-a.score).map(p => `<div class="flex justify-between"><span>${p.name}</span><span>${p.score}</span></div>`).join(''); document.getElementById('modal-rank').classList.remove('hidden'); document.getElementById('rank-btn-admin').classList.remove('hidden'); document.getElementById('rank-btn-admin').onclick = () => { document.getElementById('modal-rank').classList.add('hidden'); bolo.round++; bolo.betting = true; updateBoloUI(); }; } }
+    function updateBoloUI() { const n = getSeq(bolo.players.length)[bolo.round]; document.getElementById('bolo-info').innerText = `RONDA ${bolo.round + 1}`; document.getElementById('bolo-cards').innerText = n; const area = document.getElementById('bolo-inputs'); area.innerHTML = bolo.players.map((p, i) => `<div class="flex justify-between items-center p-4 glass"><span>${p.name} ${!bolo.betting ? '(Pidi\u00f3 '+p.bet+')' : ''}</span><input type="number" id="bi-${i}" class="w-16 p-2 bg-black rounded text-center"></div>`).join(''); checkBoloRule(); }
+    function checkBoloRule() { if(!bolo.betting) return; const n = getSeq(bolo.players.length)[bolo.round]; let sum = 0; for(let i=0; i<bolo.players.length-1; i++) sum += parseInt(document.getElementById('bi-'+i).value) || 0; const f = n - sum; const isF = (f >= 0 && f <= n); document.getElementById('bolo-rule').classList.toggle('hidden', !isF); if(isF) document.getElementById('bolo-forbid').innerText = f; }
+    function nextBolo() {
+        if(bolo.betting) {
+            bolo.players.forEach((p, i) => p.bet = parseInt(document.getElementById('bi-'+i).value) || 0);
+            bolo.betting = false; updateBoloUI();
+        } else {
+            bolo.players.forEach((p, i) => { 
+                const m = parseInt(document.getElementById('bi-'+i).value) || 0; 
+                let d = (m === p.bet) ? (10 + m * 5) : -5;
+                p.score += d; p.lastDiff = d;
+            });
+            document.getElementById('rank-content').innerHTML = [...bolo.players].sort((a,b)=>b.score-a.score).map(p => `<div class="flex justify-between font-black"><span>${p.name}</span><span>${p.score} (${p.lastDiff >= 0 ? '+' : ''}${p.lastDiff})</span></div>`).join('');
+            document.getElementById('modal-rank').classList.remove('hidden');
+            document.getElementById('rank-btn-admin').classList.remove('hidden');
+            document.getElementById('rank-btn-admin').onclick = () => { document.getElementById('modal-rank').classList.add('hidden'); bolo.round++; bolo.betting = true; updateBoloUI(); };
+        }
+    }
 
     function cardUI(c, mode='normal', off=false) {
-        const v = c.v === 1 ? 'A' : c.v; // Muestra números 10, 11, 12 directamente
-        return `<div class="card ${mode==='small'?'scale-75':''} ${off?'disabled':'card-active'}"><div class="leading-none text-[10px]">${v}</div><div class="text-3xl text-center">${suits[c.s]}</div><div class="leading-none text-[10px] self-end rotate-180">${v}</div></div>`;
+        const v = c.v === 1 ? 'A' : c.v;
+        return `<div class="card ${mode==='small'?'scale-75':''} ${off?'disabled':'card-active'}"><div class="leading-none text-[10px]">${v}</div><div class="suits">${suits[c.s]}</div><div class="leading-none text-[10px] self-end rotate-180">${v}</div></div>`;
     }
     function getSeq(nP) {
         let s = []; const max = Math.floor(40/nP);
-        for(let i=0;i<nP;i++) s.push(1); 
-        for(let i=2;i<max;i++) s.push(i);
-        for(let i=0;i<nP;i++) s.push(max); 
-        for(let i=max-1;i>=2;i--) s.push(i);
-        for(let i=0;i<nP;i++) s.push(1); 
-        return s;
+        for(let i=0;i<nP;i++) s.push(1); for(let i=2;i<max;i++) s.push(i);
+        for(let i=0;i<nP;i++) s.push(max); for(let i=max-1;i>=2;i--) s.push(i);
+        for(let i=0;i<nP;i++) s.push(1); return s;
     }
 </script>
 </body>
