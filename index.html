@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Dieta Semanal</title>
+    <title>Mi Dieta Detallada</title>
     <style>
         :root {
             --primary: #2e7d32;
-            --accent: #81c784;
-            --bg: #f9fbf9;
-            --card-bg: #ffffff;
+            --accent: #e8f5e9;
+            --bg: #f4f7f4;
+            --text: #2c3e50;
         }
 
         body {
@@ -17,11 +17,12 @@
             background-color: var(--bg);
             margin: 0;
             padding: 20px;
-            color: #333;
+            color: var(--text);
+            line-height: 1.5;
         }
 
         .container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
         }
 
@@ -29,9 +30,10 @@
             text-align: center;
             background: var(--primary);
             color: white;
-            padding: 2rem;
-            border-radius: 15px;
-            margin-bottom: 20px;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
 
         /* SECCIÓN FIJA */
@@ -43,52 +45,73 @@
         }
 
         .fixed-item {
-            background: var(--accent);
-            padding: 15px;
-            border-radius: 10px;
-            text-align: center;
-            color: #1b5e20;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            border-top: 4px solid var(--primary);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
 
-        .fixed-item h3 { margin: 0 0 5px 0; font-size: 0.9rem; text-transform: uppercase; }
-        .fixed-item p { margin: 0; font-weight: bold; font-size: 1.1rem; }
+        .fixed-item h3 { margin: 0 0 10px 0; color: var(--primary); font-size: 1rem; }
+        .fixed-item ul { margin: 0; padding-left: 20px; }
 
         /* LISTADO DIARIO */
         .day-row {
             display: grid;
-            grid-template-columns: 120px 1fr 1fr;
-            background: var(--card-bg);
-            margin-bottom: 10px;
-            border-radius: 8px;
-            align-items: center;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            grid-template-columns: 140px 1fr 1fr;
+            background: white;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
             overflow: hidden;
         }
 
         .day-name {
-            background: #f0f0f0;
-            padding: 15px;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-weight: bold;
-            text-align: center;
-            border-right: 2px solid var(--bg);
+            font-size: 1.1rem;
+            color: var(--primary);
+            border-right: 1px solid #eee;
         }
 
         .meal {
-            padding: 15px;
+            padding: 20px;
+            border-right: 1px solid #f0f0f0;
         }
+
+        .meal:last-child { border-right: none; }
 
         .meal-label {
-            display: block;
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 2px 10px;
+            border-radius: 15px;
             font-size: 0.7rem;
-            color: #888;
             text-transform: uppercase;
+            margin-bottom: 10px;
         }
 
-        @media (max-width: 600px) {
+        /* Estilo de los puntitos */
+        .meal-list {
+            margin: 0;
+            padding-left: 18px;
+            list-style-type: disc;
+        }
+
+        .meal-list li {
+            margin-bottom: 5px;
+            font-size: 0.95rem;
+        }
+
+        @media (max-width: 768px) {
             .day-row { grid-template-columns: 1fr; }
-            .day-name { border-right: none; border-bottom: 2px solid var(--bg); }
+            .day-name { padding: 10px; border-right: none; border-bottom: 1px solid #eee; }
             .fixed-menu { grid-template-columns: 1fr; }
+            .meal { border-right: none; border-bottom: 1px solid #f0f0f0; }
         }
     </style>
 </head>
@@ -102,11 +125,19 @@
     <div class="fixed-menu">
         <div class="fixed-item">
             <h3>☕ Desayuno Diario</h3>
-            <p>Café con leche y tostadas integrales</p>
+            <ul class="meal-list">
+                <li>Café solo o con leche</li>
+                <li>Tostada de pan integral</li>
+                <li>Aceite de oliva virgen extra</li>
+            </ul>
         </div>
         <div class="fixed-item">
             <h3>🍏 Almuerzo y Merienda</h3>
-            <p>Pieza de fruta o yogur natural</p>
+            <ul class="meal-list">
+                <li>Pieza de fruta de temporada</li>
+                <li>Puñado de nueces naturales</li>
+                <li>Infusión sin azúcar</li>
+            </ul>
         </div>
     </div>
 
@@ -116,11 +147,19 @@
             <div class="day-name">Lunes</div>
             <div class="meal">
                 <span class="meal-label">Comida</span>
-                Ensalada de pasta y atún
+                <ul class="meal-list">
+                    <li>Pechuga de pollo al limón</li>
+                    <li>Arroz integral cocido</li>
+                    <li>Ensalada de canónigos</li>
+                </ul>
             </div>
             <div class="meal">
                 <span class="meal-label">Cena</span>
-                Crema de calabacín
+                <ul class="meal-list">
+                    <li>Crema de calabaza</li>
+                    <li>Huevo poché</li>
+                    <li>Yogur natural de postre</li>
+                </ul>
             </div>
         </div>
 
@@ -128,75 +167,23 @@
             <div class="day-name">Martes</div>
             <div class="meal">
                 <span class="meal-label">Comida</span>
-                Pechuga de pollo con arroz
+                <ul class="meal-list">
+                    <li>Garbanzos salteados con espinacas</li>
+                    <li>Huevo duro troceado</li>
+                    <li>Una rodaja de sandía</li>
+                </ul>
             </div>
             <div class="meal">
                 <span class="meal-label">Cena</span>
-                Revuelto de setas
+                <ul class="meal-list">
+                    <li>Merluza a la plancha</li>
+                    <li>Judías verdes al vapor</li>
+                    <li>Infusión relajante</li>
+                </ul>
             </div>
         </div>
 
-        <div class="day-row">
-            <div class="day-name">Miércoles</div>
-            <div class="meal">
-                <span class="meal-label">Comida</span>
-                Lentejas con verduras
-            </div>
-            <div class="meal">
-                <span class="meal-label">Cena</span>
-                Salmón a la plancha
-            </div>
         </div>
-
-        <div class="day-row">
-            <div class="day-name">Jueves</div>
-            <div class="meal">
-                <span class="meal-label">Comida</span>
-                Garbanzos salteados
-            </div>
-            <div class="meal">
-                <span class="meal-label">Cena</span>
-                Ensalada César
-            </div>
-        </div>
-
-        <div class="day-row">
-            <div class="day-name">Viernes</div>
-            <div class="meal">
-                <span class="meal-label">Comida</span>
-                Filete de ternera y puré
-            </div>
-            <div class="meal">
-                <span class="meal-label">Cena</span>
-                Pizza casera saludable
-            </div>
-        </div>
-
-        <div class="day-row">
-            <div class="day-name">Sábado</div>
-            <div class="meal">
-                <span class="meal-label">Comida</span>
-                Paella o arroz libre
-            </div>
-            <div class="meal">
-                <span class="meal-label">Cena</span>
-                Sándwich vegetal
-            </div>
-        </div>
-
-        <div class="day-row">
-            <div class="day-name">Domingo</div>
-            <div class="meal">
-                <span class="meal-label">Comida</span>
-                Horneado de verduras
-            </div>
-            <div class="meal">
-                <span class="meal-label">Cena</span>
-                Sopa de fideos
-            </div>
-        </div>
-
-    </div>
 </div>
 
 </body>
