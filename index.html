@@ -6,82 +6,89 @@
     <title>Mi Dieta Semanal</title>
     <style>
         :root {
-            --primary: #4CAF50;
-            --bg: #f4f7f6;
-            --text: #333;
-            --white: #ffffff;
+            --primary: #2e7d32;
+            --accent: #81c784;
+            --bg: #f9fbf9;
+            --card-bg: #ffffff;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', system-ui, sans-serif;
             background-color: var(--bg);
-            color: var(--text);
             margin: 0;
             padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
         }
 
         header {
             text-align: center;
-            padding: 20px 0;
             background: var(--primary);
             color: white;
-            border-radius: 8px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-
-        .day-card {
-            background: var(--white);
+            padding: 2rem;
+            border-radius: 15px;
             margin-bottom: 20px;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            border-left: 5px solid var(--primary);
         }
 
-        .day-title {
-            background: #e8f5e9;
-            padding: 15px 20px;
-            margin: 0;
-            font-size: 1.2rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .grid-meals {
+        /* SECCIÓN FIJA */
+        .fixed-menu {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: 1fr 1fr;
             gap: 15px;
-            padding: 20px;
+            margin-bottom: 30px;
         }
 
-        .meal-section {
-            padding: 10px;
-            border-bottom: 1px solid #eee;
+        .fixed-item {
+            background: var(--accent);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            color: #1b5e20;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
-        .meal-name {
+        .fixed-item h3 { margin: 0 0 5px 0; font-size: 0.9rem; text-transform: uppercase; }
+        .fixed-item p { margin: 0; font-weight: bold; font-size: 1.1rem; }
+
+        /* LISTADO DIARIO */
+        .day-row {
+            display: grid;
+            grid-template-columns: 120px 1fr 1fr;
+            background: var(--card-bg);
+            margin-bottom: 10px;
+            border-radius: 8px;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .day-name {
+            background: #f0f0f0;
+            padding: 15px;
             font-weight: bold;
-            color: var(--primary);
-            font-size: 0.9rem;
-            margin-bottom: 5px;
-            display: block;
+            text-align: center;
+            border-right: 2px solid var(--bg);
         }
 
-        .meal-content {
-            font-size: 1rem;
-            color: #555;
+        .meal {
+            padding: 15px;
+        }
+
+        .meal-label {
+            display: block;
+            font-size: 0.7rem;
+            color: #888;
+            text-transform: uppercase;
         }
 
         @media (max-width: 600px) {
-            .grid-meals {
-                grid-template-columns: 1fr;
-            }
+            .day-row { grid-template-columns: 1fr; }
+            .day-name { border-right: none; border-bottom: 2px solid var(--bg); }
+            .fixed-menu { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -92,34 +99,105 @@
         <h1>SEMANA X</h1>
     </header>
 
-    <div class="day-card">
-        <h2 class="day-title">Lunes</h2>
-        <div class="grid-meals">
-            <div class="meal-section">
-                <span class="meal-name">Desayuno</span>
-                <div class="meal-content">Tostadas con aguacate y café</div>
-            </div>
-            <div class="meal-section">
-                <span class="meal-name">Almuerzo / Merienda</span>
-                <div class="meal-content">Fruta de temporada o frutos secos</div>
-            </div>
-            <div class="meal-section">
-                <span class="meal-name">Comida</span>
-                <div class="meal-content">Pollo a la plancha con ensalada mixta</div>
-            </div>
-            <div class="meal-section">
-                <span class="meal-name">Cena</span>
-                <div class="meal-content">Pescado al horno con verduras</div>
-            </div>
+    <div class="fixed-menu">
+        <div class="fixed-item">
+            <h3>☕ Desayuno Diario</h3>
+            <p>Café con leche y tostadas integrales</p>
+        </div>
+        <div class="fixed-item">
+            <h3>🍏 Almuerzo y Merienda</h3>
+            <p>Pieza de fruta o yogur natural</p>
         </div>
     </div>
 
-    <div class="day-card">
-        <h2 class="day-title">Martes</h2>
-        <div class="grid-meals">
-            <div class="meal-section">
-                <span class="meal-name">Desayuno</span>
-                <div class="meal-content">Yogur con avena</div>
+    <div class="diet-list">
+        
+        <div class="day-row">
+            <div class="day-name">Lunes</div>
+            <div class="meal">
+                <span class="meal-label">Comida</span>
+                Ensalada de pasta y atún
             </div>
-            <div class="meal-section">
-                <span class="meal-name">Al
+            <div class="meal">
+                <span class="meal-label">Cena</span>
+                Crema de calabacín
+            </div>
+        </div>
+
+        <div class="day-row">
+            <div class="day-name">Martes</div>
+            <div class="meal">
+                <span class="meal-label">Comida</span>
+                Pechuga de pollo con arroz
+            </div>
+            <div class="meal">
+                <span class="meal-label">Cena</span>
+                Revuelto de setas
+            </div>
+        </div>
+
+        <div class="day-row">
+            <div class="day-name">Miércoles</div>
+            <div class="meal">
+                <span class="meal-label">Comida</span>
+                Lentejas con verduras
+            </div>
+            <div class="meal">
+                <span class="meal-label">Cena</span>
+                Salmón a la plancha
+            </div>
+        </div>
+
+        <div class="day-row">
+            <div class="day-name">Jueves</div>
+            <div class="meal">
+                <span class="meal-label">Comida</span>
+                Garbanzos salteados
+            </div>
+            <div class="meal">
+                <span class="meal-label">Cena</span>
+                Ensalada César
+            </div>
+        </div>
+
+        <div class="day-row">
+            <div class="day-name">Viernes</div>
+            <div class="meal">
+                <span class="meal-label">Comida</span>
+                Filete de ternera y puré
+            </div>
+            <div class="meal">
+                <span class="meal-label">Cena</span>
+                Pizza casera saludable
+            </div>
+        </div>
+
+        <div class="day-row">
+            <div class="day-name">Sábado</div>
+            <div class="meal">
+                <span class="meal-label">Comida</span>
+                Paella o arroz libre
+            </div>
+            <div class="meal">
+                <span class="meal-label">Cena</span>
+                Sándwich vegetal
+            </div>
+        </div>
+
+        <div class="day-row">
+            <div class="day-name">Domingo</div>
+            <div class="meal">
+                <span class="meal-label">Comida</span>
+                Horneado de verduras
+            </div>
+            <div class="meal">
+                <span class="meal-label">Cena</span>
+                Sopa de fideos
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>
